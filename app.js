@@ -12,7 +12,7 @@ let replyText = "";
 let currentSelectedMsgId = null;
 
 const ADMIN_EMAIL = "sanwarhossain2055@gmail.com"; 
-const USER_EMAIL = "nightq1181@gmail.com"; // এখানে আপনার অপর ইউজারের সঠিক ইমেইলটি দিন
+const USER_EMAIL = "nightq1181@gmail.com"; // আপনার অপর ইউজারের সঠিক ইমেইল আইডি
 
 /* ---------------- ১. লগইন এবং সেশন কন্ট্রোল ---------------- */
 window.login = async function() {
@@ -54,8 +54,18 @@ onAuthStateChanged(auth, async (user) => {
     
     chatPartnerEmail = (currentUserEmail === ADMIN_EMAIL) ? USER_EMAIL : ADMIN_EMAIL;
     
+    // হেডারে চ্যাট পার্টনারের নাম বা ইমেইল সেট করা
     const titleEl = document.getElementById('chatWithTitle');
-    if(titleEl) titleEl.innerText = `${chatPartnerEmail}`;
+    if(titleEl) {
+      // ইমেইল বড় হলে শুধু আগের অংশ বা পুরো নাম দেখাতে পারেন
+      titleEl.innerText = chatPartnerEmail.split('@')[0]; 
+    }
+
+    // প্রোফাইল এভাটার বা লোগোতে প্রথম অক্ষর বসানো
+    const avatarEl = document.querySelector('.avatar');
+    if(avatarEl) {
+      avatarEl.innerText = chatPartnerEmail.charAt(0).toUpperCase();
+    }
 
     chatRoomId = currentUserEmail < chatPartnerEmail 
       ? `${currentUserEmail.replace(/[.@]/g, '_')}_${chatPartnerEmail.replace(/[.@]/g, '_')}`
@@ -89,13 +99,13 @@ function listenPartnerStatus() {
       const data = snap.data();
       if (data.typing) {
         statusEl.innerText = "typing...";
-        statusEl.className = "status-online";
+        statusEl.className = "status-online"; // সবুজ রঙ হবে
       } else if (data.online) {
         statusEl.innerText = "Online";
-        statusEl.className = "status-online";
+        statusEl.className = "status-online"; // সবুজ রঙ হবে
       } else {
         statusEl.innerText = "Offline";
-        statusEl.className = "status-offline";
+        statusEl.className = "status-text"; // সাধারণ ধূসর রঙ হবে
       }
     }
   });
@@ -132,7 +142,7 @@ function loadPrivateChatMessages() {
       } else {
         let formattedText = data.text || "";
         const urlRegex = /(https?:\/\/[^\s]+)/g;
-        formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #53bdeb; text-decoration: underline;">${url}</a>`);
+        formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #40c4ff; text-decoration: underline;">${url}</a>`);
         contentHTML = `<div class="msg-content">${formattedText}</div>`;
       }
 
@@ -158,11 +168,12 @@ function loadPrivateChatMessages() {
 
       box.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight;
+    // নতুন মেসেজ আসলে নিচে স্মুথ স্ক্রোল হবে
+    setTimeout(() => { box.scrollTop = box.scrollHeight; }, 100);
   });
 }
 
-/* ---------------- ৫. মেসেজ পাঠানো (ফিক্সড লজিক) ---------------- */
+/* ---------------- ৫. মেসেজ পাঠানো ---------------- */
 window.sendMessage = async function() {
   const input = document.getElementById('messageInput');
   const messageText = input.value.trim();
@@ -170,20 +181,21 @@ window.sendMessage = async function() {
   if (!messageText || !chatRoomId || !currentUserEmail) return;
 
   try {
-    // ডাটাবেসে মেসেজ পাঠানো নিশ্চিত করা
     await addDoc(collection(db, 'rooms', chatRoomId, 'messages'), {
       text: messageText,
       sender: currentUserEmail,
       reply: replyText || "",
       seen: false,
-      time: serverTimestamp() // এটি ফায়ারবেস সার্ভার টাইম নেবে
+      time: serverTimestamp()
     });
 
-    // ইনপুট এবং টাইপিং রিসেট করা
     input.value = "";
     replyText = "";
     document.getElementById('typing').innerText = "";
     await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
+    
+    const box = document.getElementById('messages');
+    if(box) box.scrollTop = box.scrollHeight;
   } catch (error) {
     alert("মেসেজ পাঠানো যায়নি: " + error.message);
   }
@@ -200,7 +212,7 @@ window.emitTyping = function() {
   }, 2000); 
 }
 
-/* ---------------- ৭. Reply এবং Emoji Reaction সিস্টেম ---------------- */
+/* ---------------- ७. Reply এবং Emoji Reaction সিস্টেম ---------------- */
 window.triggerReply = function(text) {
   replyText = text;
   document.getElementById('typing').innerText = "Replying to: " + text;
@@ -293,4 +305,15 @@ window.startRecording = async function() {
   } catch (err) {
     alert("মাইক্রোফোন অ্যাক্সেস করতে সমস্যা হয়েছে: " + err.message);
   }
+}
+
+/* ---------------- ১১. MOBILE KEYBOARD FIX ---------------- */
+const inputField = document.getElementById('messageInput');
+if(inputField) {
+  inputField.addEventListener('focus', () => {
+    setTimeout(() => {
+      const box = document.getElementById('messages');
+      if(box) box.scrollTop = box.scrollHeight;
+    }, 200);
+  });
 }
