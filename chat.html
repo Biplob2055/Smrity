@@ -2,23 +2,23 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Smrity Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-body">
 
   <div class="chat-header">
-    <div class="user-info">
-      <div class="avatar">💬</div>
-      <div>
-        <div id="chatWithTitle">Smrity Chat</div>
-        <div id="status" class="status-offline">Offline</div>
+    <div class="header-left">
+      <button onclick="logout()" class="back-btn">←</button>
+      <div class="avatar">S</div>
+      <div class="user-details">
+        <div id="chatWithTitle">Samale Torres</div>
+        <div id="status" class="status-text">Offline</div>
       </div>
     </div>
-    <div class="header-buttons">
-      <button onclick="clearAllMessages()" class="btn-clear" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 13px;">Clear Chat</button>
-      <button onclick="logout()" class="btn-logout">Exit</button>
+    <div class="header-right">
+      <button onclick="clearAllMessages()" class="btn-clear-chat">Clear</button>
     </div>
   </div>
 
@@ -27,13 +27,17 @@
   <div id="typing" class="action-indicator"></div>
 
   <div class="bottom-input-bar">
-    <button class="icon-btn" onclick="toggleEmojiMenu()">😀</button>
-    
-    <input id="messageInput" placeholder="মেসেজ লিখুন..." oninput="emitTyping()">
-    
-    <button class="btn-send" onclick="sendMessage()">➤</button>
-    <button class="btn-voice" onclick="startRecording()">🎤</button>
-    
+    <div class="input-container-box">
+      <button class="input-icon-btn" onclick="toggleEmojiMenu()">😊</button>
+      <input id="messageInput" placeholder="Type a message..." oninput="emitTyping()">
+      <button class="input-icon-btn" onclick="startRecording()">📎</button>
+    </div>
+    <button class="btn-send-modern" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="currentColor">
+        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+      </svg>
+    </button>
+
     <div id="emojiMenu" class="emoji-popup">
       <span onclick="appendEmoji('👍')">👍</span>
       <span onclick="appendEmoji('❤️')">❤️</span>
