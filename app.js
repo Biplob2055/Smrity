@@ -1,8 +1,7 @@
 import {
   auth, db, storage,
   signInWithEmailAndPassword, onAuthStateChanged, signOut,
-  collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, setDoc,
-  ref, uploadBytes, getDownloadURL
+  collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, setDoc
 } from './firebase.js';
 import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -13,7 +12,7 @@ let replyText = "";
 let currentSelectedMsgId = null;
 
 const ADMIN_EMAIL = "sanwarhossain2055@gmail.com"; 
-const USER_EMAIL = "nightq1181@gmail.com"; // এখানে আপনার অন্য ইউজারের সঠিক ইমেইলটি দিন
+const USER_EMAIL = "nightq1181@gmail.com"; // এখানে আপনার অপর ইউজারের সঠিক ইমেইলটি দিন
 
 /* ---------------- ১. লগইন এবং সেশন কন্ট্রোল ---------------- */
 window.login = async function() {
@@ -104,6 +103,7 @@ function listenPartnerStatus() {
 
 /* ---------------- ৪. মেসেজ লোড ও রিয়্যাল-টাইম সিন সিস্টেম ---------------- */
 function loadPrivateChatMessages() {
+  if (!chatRoomId) return;
   const q = query(collection(db, 'rooms', chatRoomId, 'messages'), orderBy('time'));
   
   onSnapshot(q, (snap) => {
@@ -141,7 +141,7 @@ function loadPrivateChatMessages() {
       
       let actionControlHTML = `
         <div class="action-links">
-          <span onclick="triggerReply('${data.text ? data.text : 'ভয়েস মেসেজ'}')">Reply</span> | 
+          <span onclick="triggerReply('${data.text ? data.text.replace(/'/g, "\\'") : 'ভয়েস মেসেজ'}')">Reply</span> | 
           <span onclick="triggerReactionBox('${msgId}')">React</span>
           ${(isMe || isAdmin) ? ` | <span class="del-admin" onclick="deleteTargetMsg('${msgId}')">Delete</span>` : ""}
         </div>
@@ -162,23 +162,31 @@ function loadPrivateChatMessages() {
   });
 }
 
-/* ---------------- ৫. মেসেজ পাঠানো ---------------- */
+/* ---------------- ৫. মেসেজ পাঠানো (ফিক্সড লজিক) ---------------- */
 window.sendMessage = async function() {
   const input = document.getElementById('messageInput');
-  if (!input.value.trim() || !chatRoomId) return;
+  const messageText = input.value.trim();
+  
+  if (!messageText || !chatRoomId || !currentUserEmail) return;
 
-  await addDoc(collection(db, 'rooms', chatRoomId, 'messages'), {
-    text: input.value,
-    sender: currentUserEmail,
-    reply: replyText,
-    seen: false,
-    time: serverTimestamp()
-  });
+  try {
+    // ডাটাবেসে মেসেজ পাঠানো নিশ্চিত করা
+    await addDoc(collection(db, 'rooms', chatRoomId, 'messages'), {
+      text: messageText,
+      sender: currentUserEmail,
+      reply: replyText || "",
+      seen: false,
+      time: serverTimestamp() // এটি ফায়ারবেস সার্ভার টাইম নেবে
+    });
 
-  input.value = "";
-  replyText = "";
-  document.getElementById('typing').innerText = "";
-  await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
+    // ইনপুট এবং টাইপিং রিসেট করা
+    input.value = "";
+    replyText = "";
+    document.getElementById('typing').innerText = "";
+    await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
+  } catch (error) {
+    alert("মেসেজ পাঠানো যায়নি: " + error.message);
+  }
 }
 
 /* ---------------- ৬. Typing Indicator লজিক ---------------- */
@@ -219,14 +227,14 @@ window.toggleEmojiMenu = function() {
   menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
 }
 
-/* ---------------- ৮. 单个 Message Delete ---------------- */
+/* ---------------- ৮. একক Message Delete ---------------- */
 window.deleteTargetMsg = async function(msgId) {
   if (confirm("আপনি কি এই মেসেজটি সবার জন্য ডিলিট করতে চান?")) {
     await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
   }
 }
 
-/* ---------------- ৯. FEATURE: সমস্ত মেসেজ একসাথে ক্লিয়ার করা ---------------- */
+/* ---------------- ৯. সমস্ত মেসেজ একসাথে ক্লিয়ার করা ---------------- */
 window.clearAllMessages = async function() {
   if (!chatRoomId) return;
   
@@ -236,7 +244,6 @@ window.clearAllMessages = async function() {
       const messagesRef = collection(db, 'rooms', chatRoomId, 'messages');
       const querySnapshot = await getDocs(messagesRef);
       
-      // লুপ চালিয়ে ডাটাবেসের ওই রুমের প্রতিটি ডকুমেন্ট ডিলিট করা
       const deletePromises = [];
       querySnapshot.forEach((msgDoc) => {
         deletePromises.push(deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgDoc.id)));
