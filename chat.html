@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Smrity Private Chat</title>
+  <title>Smrity Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="chat-body">
 
   <div class="chat-header">
     <div class="user-info">
@@ -16,15 +16,9 @@
         <div id="status" class="status-offline">Offline</div>
       </div>
     </div>
-    <button onclick="logout()" class="btn-logout">Exit</button>
-  </div>
-
-  <div id="userSelector" class="partner-selector">
-    <h3>প্রাইভেট চ্যাট রুম</h3>
-    <p>যার সাথে চ্যাট করতে চান তার ইমেইলটি নিচে লিখুন:</p>
-    <div class="selector-field">
-      <input type="email" id="chatWithEmail" placeholder="partner@gmail.com">
-      <button onclick="startPrivateChat()">Start</button>
+    <div class="header-buttons">
+      <button onclick="clearAllMessages()" class="btn-clear" style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 13px;">Clear Chat</button>
+      <button onclick="logout()" class="btn-logout">Exit</button>
     </div>
   </div>
 
