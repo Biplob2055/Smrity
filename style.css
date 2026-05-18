@@ -1,81 +1,105 @@
-body{
-margin:0;
-font-family:Arial;
-background:#e5ddd5;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #e5ddd5;
+  /* পুরো স্ক্রিন জুড়ানোর জন্য এবং স্ক্রোল লক করার জন্য */
+  display: flex;
+  flex-direction: column;
+  height: 100vh; 
+  overflow: hidden;
 }
 
 /* HEADER */
-.header{
-background:#075e54;
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
+.header {
+  background: #075e54;
+  color: white;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 50px; /* ফিক্সড হাইট */
+  box-sizing: border-box;
 }
 
 /* CHAT AREA */
-#messages{
-height:75vh;
-overflow-y:auto;
-padding:10px;
-display:flex;
-flex-direction:column;
+#messages {
+  flex: 1; /* বাকি সব খালি জায়গা এই অংশটি একা নিয়ে নেবে */
+  overflow-y: auto;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  -webkit-overflow-scrolling: touch; /* আইফোনে স্মুথ স্ক্রোলিংয়ের জন্য */
 }
 
 /* MESSAGE BUBBLE */
-.message{
-max-width:70%;
-padding:10px;
-margin:5px;
-border-radius:10px;
-font-size:14px;
-word-wrap:break-word;
+.message {
+  max-width: 75%; /* মোবাইলের জন্য একটু বাড়ানো হয়েছে */
+  padding: 10px 12px;
+  margin: 5px;
+  border-radius: 10px;
+  font-size: 15px; /* মোবাইলে পড়ার সুবিধার জন্য ১px বাড়ানো হলো */
+  word-wrap: break-word;
 }
 
 /* MY MESSAGE */
-.me{
-background:#dcf8c6;
-align-self:flex-end;
-border-bottom-right-radius:0;
+.me {
+  background: #dcf8c6;
+  align-self: flex-end;
+  border-bottom-right-radius: 0;
 }
 
 /* OTHER MESSAGE */
-.other{
-background:white;
-align-self:flex-start;
-border-bottom-left-radius:0;
+.other {
+  background: white;
+  align-self: flex-start;
+  border-bottom-left-radius: 0;
+}
+
+/* TYPING INDICATOR */
+#typing {
+  padding: 5px 10px;
+  font-size: 12px;
+  color: gray;
+  background: transparent;
 }
 
 /* INPUT BAR */
-.chat-box{
-position:fixed;
-bottom:0;
-width:100%;
-display:flex;
-padding:8px;
-background:#f0f0f0;
+.chat-box {
+  /* position: fixed বাদ দেওয়া হয়েছে, এটি এখন নিচে নরমাললি থাকবে */
+  display: flex;
+  padding: 8px;
+  background: #f0f0f0;
+  align-items: center;
+  box-sizing: border-box;
 }
 
-.chat-box input{
-flex:1;
-padding:10px;
-border:none;
-border-radius:20px;
-outline:none;
+.chat-box input {
+  flex: 1;
+  padding: 12px; /* মোবাইলে টাচ করার সুবিধার জন্য সামান্য বড় করা হলো */
+  border: none;
+  border-radius: 20px;
+  outline: none;
+  font-size: 16px; /* খুবই গুরুত্বপূর্ণ: ১৬px দিলে আইফোনে অটো-জুম হবে না */
 }
 
-.chat-box button{
-background:#075e54;
-color:white;
-border:none;
-padding:10px 15px;
-margin-left:5px;
-border-radius:50%;
+.chat-box button {
+  background: #075e54;
+  color: white;
+  border: none;
+  width: 44px;  /* ফিক্সড সাইজ গোল বাটনের জন্য */
+  height: 44px; /* ফিক্সড সাইজ গোল বাটনের জন্য */
+  margin-left: 5px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* বাটন যেন ছোট হয়ে চ্যাপ্টা না হয়ে যায় */
 }
 
-/* TYPING */
-#typing{
-padding:5px 10px;
-font-size:12px;
-color:gray;
+/* ছোট মোবাইল স্ক্রিনের জন্য কিছু অতিরিক্ত সমন্বয় */
+@media (max-width: 480px) {
+  .message {
+    max-width: 85%; /* ছোট মোবাইলে মেসেজ বাবল আরেকটু চওড়া হবে */
+  }
 }
