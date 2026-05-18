@@ -1,22 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-<title>Smrity Login</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smrity Chat - Login</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="login-body">
 
-<div class="login-box">
-  <h2>Smrity</h2>
+  <div class="login-card">
+    <h2>Smrity Chat</h2>
+    <p>প্রাইভেট ও নিরাপদ চ্যাটিং সিস্টেমে প্রবেশ করুন</p>
+    
+    <div class="input-group">
+      <input id="email" type="email" placeholder="ইমেইল অ্যাড্রেস" required>
+    </div>
+    
+    <div class="input-group">
+      <input id="password" type="password" placeholder="পাসওয়ার্ড" required>
+    </div>
 
-  <input id="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
+    <button onclick="login()">Log In</button>
+  </div>
 
-  <button onclick="login()">Login</button>
-</div>
-
-<script type="module" src="firebase.js"></script>
-<script type="module" src="app.js"></script>
-
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
