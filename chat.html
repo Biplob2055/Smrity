@@ -1,28 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-<title>Smrity Chat</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Smrity Private Chat</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="header">
-  <div>💬 Smrity Chat</div>
-  <div id="status">Offline</div>
-</div>
+  <div class="chat-header">
+    <div class="user-info">
+      <div class="avatar">💬</div>
+      <div>
+        <div id="chatWithTitle">Smrity Chat</div>
+        <div id="status" class="status-offline">Offline</div>
+      </div>
+    </div>
+    <button onclick="logout()" class="btn-logout">Exit</button>
+  </div>
 
-<div id="messages"></div>
+  <div id="userSelector" class="partner-selector">
+    <h3>প্রাইভেট চ্যাট রুম</h3>
+    <p>যার সাথে চ্যাট করতে চান তার ইমেইলটি নিচে লিখুন:</p>
+    <div class="selector-field">
+      <input type="email" id="chatWithEmail" placeholder="partner@gmail.com">
+      <button onclick="startPrivateChat()">Start</button>
+    </div>
+  </div>
 
-<div id="typing"></div>
+  <div id="messages" class="message-area"></div>
 
-<div class="chat-box">
-  <input id="messageInput" placeholder="Type message...">
-  <button onclick="sendMessage()">➤</button>
-  <button onclick="startRecording()">🎤</button>
-</div>
+  <div id="typing" class="action-indicator"></div>
 
-<script type="module" src="firebase.js"></script>
-<script type="module" src="app.js"></script>
+  <div class="bottom-input-bar">
+    <button class="icon-btn" onclick="toggleEmojiMenu()">😀</button>
+    
+    <input id="messageInput" placeholder="মেসেজ লিখুন..." oninput="emitTyping()">
+    
+    <button class="btn-send" onclick="sendMessage()">➤</button>
+    <button class="btn-voice" onclick="startRecording()">🎤</button>
+    
+    <div id="emojiMenu" class="emoji-popup">
+      <span onclick="appendEmoji('👍')">👍</span>
+      <span onclick="appendEmoji('❤️')">❤️</span>
+      <span onclick="appendEmoji('😂')">😂</span>
+      <span onclick="appendEmoji('😮')">😮</span>
+      <span onclick="appendEmoji('😢')">😢</span>
+      <span onclick="appendEmoji('🙏')">🙏</span>
+    </div>
+  </div>
 
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
