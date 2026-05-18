@@ -4,6 +4,7 @@ import {
   collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, setDoc,
   ref, uploadBytes, getDownloadURL
 } from './firebase.js';
+import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let currentUserEmail = null;
 let chatPartnerEmail = null;
@@ -11,8 +12,8 @@ let chatRoomId = null;
 let replyText = "";
 let currentSelectedMsgId = null;
 
-// সুপার অ্যাডমিন ইমেইল ডিফাইন করা (অ্যাডমিন ডিলিট কন্ট্রোলের জন্য)
 const ADMIN_EMAIL = "sanwarhossain2055@gmail.com"; 
+const USER_EMAIL = "nightq1181@gmail.com"; // এখানে আপনার অন্য ইউজারের সঠিক ইমেইলটি দিন
 
 /* ---------------- ১. লগইন এবং সেশন কন্ট্রোল ---------------- */
 window.login = async function() {
@@ -36,7 +37,7 @@ window.logout = async function() {
   window.location = 'index.html';
 }
 
-/* ---------------- ২. FEATURE: Minimize করলে অটো লগআউট ---------------- */
+/* ---------------- ২. Minimize করলে অটো লগআউট ---------------- */
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "hidden" && auth.currentUser) {
     if (currentUserEmail) {
@@ -47,16 +48,30 @@ document.addEventListener("visibilitychange", async () => {
   }
 });
 
-/* ---------------- ৩. ইউজার অথ স্ট্যাটাস ও লাইভ স্ট্যাটাস সেট ---------------- */
+/* ---------------- ৩. অটো চ্যাট রুম ডিটেকশন ও ইনিশিয়ালাইজেশন ---------------- */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUserEmail = user.email;
     
+    chatPartnerEmail = (currentUserEmail === ADMIN_EMAIL) ? USER_EMAIL : ADMIN_EMAIL;
+    
+    const titleEl = document.getElementById('chatWithTitle');
+    if(titleEl) titleEl.innerText = `${chatPartnerEmail}`;
+
+    chatRoomId = currentUserEmail < chatPartnerEmail 
+      ? `${currentUserEmail.replace(/[.@]/g, '_')}_${chatPartnerEmail.replace(/[.@]/g, '_')}`
+      : `${chatPartnerEmail.replace(/[.@]/g, '_')}_${currentUserEmail.replace(/[.@]/g, '_')}`;
+
     await setDoc(doc(db, "users", user.email), {
       online: true,
       typing: false,
       lastSeen: Date.now()
     }, { merge: true });
+
+    if(window.location.pathname.includes('chat.html')) {
+      listenPartnerStatus();
+      loadPrivateChatMessages();
+    }
 
     window.addEventListener("beforeunload", () => {
       updateDoc(doc(db, "users", currentUserEmail), { online: false, typing: false });
@@ -68,31 +83,10 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-/* ---------------- ৪. FEATURE: Private 2-User Chat রুম জেনারেটর ---------------- */
-window.startPrivateChat = function() {
-  const partnerInput = document.getElementById('chatWithEmail').value.trim();
-  if(!partnerInput || partnerInput === currentUserEmail) {
-    alert("দয়া করে পার্টনারের সঠিক ইমেইল আইডি দিন!");
-    return;
-  }
-  chatPartnerEmail = partnerInput;
-  document.getElementById('chatWithTitle').innerText = `${chatPartnerEmail}`;
-  document.getElementById('userSelector').style.display = 'none';
-
-  // অ্যালফাবেট অনুসারে ২ জনের ইমেইল সর্ট করে ইউনিক প্রাইভেট রুম আইডি তৈরি
-  chatRoomId = currentUserEmail < chatPartnerEmail 
-    ? `${currentUserEmail.replace(/[.@]/g, '_')}_${chatPartnerEmail.replace(/[.@]/g, '_')}`
-    : `${chatPartnerEmail.replace(/[.@]/g, '_')}_${currentUserEmail.replace(/[.@]/g, '_')}`;
-
-  listenPartnerStatus();
-  loadPrivateChatMessages();
-}
-
-// পার্টনারের লাইভ অনলাইন এবং টাইপিং ইন্ডিকেটর ওয়াচ করা
 function listenPartnerStatus() {
   onSnapshot(doc(db, "users", chatPartnerEmail), (snap) => {
     const statusEl = document.getElementById('status');
-    if (snap.exists()) {
+    if (statusEl && snap.exists()) {
       const data = snap.data();
       if (data.typing) {
         statusEl.innerText = "typing...";
@@ -108,7 +102,7 @@ function listenPartnerStatus() {
   });
 }
 
-/* ---------------- ৫. FEATURE: Proper Seen System (Real-time Update) ---------------- */
+/* ---------------- ৪. মেসেজ লোড ও রিয়্যাল-টাইম সিন সিস্টেম ---------------- */
 function loadPrivateChatMessages() {
   const q = query(collection(db, 'rooms', chatRoomId, 'messages'), orderBy('time'));
   
@@ -121,7 +115,6 @@ function loadPrivateChatMessages() {
       const data = d.data();
       const msgId = d.id;
 
-      // রিয়েল-টাইম সিন লজিক: মেসেজটি অন্যের হলে এবং আমি স্ক্রিনে দেখলে সাথে সাথে ডাটাবেসে seen: true হবে
       if (data.sender !== currentUserEmail && !data.seen) {
         updateDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId), { seen: true });
       }
@@ -130,27 +123,22 @@ function loadPrivateChatMessages() {
       const isMe = data.sender === currentUserEmail;
       div.className = isMe ? "message me" : "message other";
 
-      // রিপ্লাই এবং রিয়্যাকশন সাব-কম্পোনেন্ট জেনারেট করা
       let replyHTML = data.reply ? `<div class="inside-reply">↪ ${data.reply}</div>` : "";
       let reactionHTML = data.reaction ? `<div class="badge-reaction" onclick="removeReaction('${msgId}')">${data.reaction}</div>` : "";
       
-      // লিঙ্ক শেয়ারিং এবং টেক্সট/অডিও ডিটেকশন
       let contentHTML = "";
       if(data.audio) {
         contentHTML = `<audio controls src="${data.audio}" style="max-width:100%;"></audio>`;
       } else {
-        // অটোমেটিক ইউআরএল/লিঙ্ক ডিটেকশন (Link Support)
         let formattedText = data.text || "";
         const urlRegex = /(https?:\/\/[^\s]+)/g;
         formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #53bdeb; text-decoration: underline;">${url}</a>`);
         contentHTML = `<div class="msg-content">${formattedText}</div>`;
       }
 
-      // সিন স্ট্যাটাস টিক চিহ্ন নির্ধারণ
       let tickStatus = data.seen ? `<span class="seen-blue">✓✓ Seen</span>` : "✓ Delivered";
-
-      // FEATURE: Admin Delete Control লজিক
       let isAdmin = currentUserEmail === ADMIN_EMAIL;
+      
       let actionControlHTML = `
         <div class="action-links">
           <span onclick="triggerReply('${data.text ? data.text : 'ভয়েস মেসেজ'}')">Reply</span> | 
@@ -170,11 +158,11 @@ function loadPrivateChatMessages() {
 
       box.appendChild(div);
     });
-    box.scrollTop = box.scrollHeight; // অটো স্ক্রোল টু বটম
+    box.scrollTop = box.scrollHeight;
   });
 }
 
-/* ---------------- ৬. মেসেজ পাঠানো (Text, Reply, Link Support) ---------------- */
+/* ---------------- ৫. মেসেজ পাঠানো ---------------- */
 window.sendMessage = async function() {
   const input = document.getElementById('messageInput');
   if (!input.value.trim() || !chatRoomId) return;
@@ -193,20 +181,18 @@ window.sendMessage = async function() {
   await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
 }
 
-/* ---------------- ৭. FEATURE: Typing Indicator লজিক ---------------- */
+/* ---------------- ৬. Typing Indicator লজিক ---------------- */
 let typingDelayTimer;
 window.emitTyping = function() {
   if (!currentUserEmail) return;
-  
   updateDoc(doc(db, "users", currentUserEmail), { typing: true });
-  
   clearTimeout(typingDelayTimer);
   typingDelayTimer = setTimeout(() => {
     updateDoc(doc(db, "users", currentUserEmail), { typing: false });
   }, 2000); 
 }
 
-/* ---------------- ৮. FEATURE: Reply এবং Emoji Reaction সিস্টেম ---------------- */
+/* ---------------- ৭. Reply এবং Emoji Reaction সিস্টেম ---------------- */
 window.triggerReply = function(text) {
   replyText = text;
   document.getElementById('typing').innerText = "Replying to: " + text;
@@ -233,10 +219,36 @@ window.toggleEmojiMenu = function() {
   menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
 }
 
-/* ---------------- ৯. FEATURE: Admin Delete Control ---------------- */
+/* ---------------- ৮. 单个 Message Delete ---------------- */
 window.deleteTargetMsg = async function(msgId) {
   if (confirm("আপনি কি এই মেসেজটি সবার জন্য ডিলিট করতে চান?")) {
     await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
+  }
+}
+
+/* ---------------- ৯. FEATURE: সমস্ত মেসেজ একসাথে ক্লিয়ার করা ---------------- */
+window.clearAllMessages = async function() {
+  if (!chatRoomId) return;
+  
+  if (confirm("আপনি কি এই চ্যাটের সমস্ত মেসেজ স্থায়ীভাবে মুছে ফেলতে চান? (এটি আর ফিরিয়ে আনা যাবে না)")) {
+    try {
+      document.getElementById('typing').innerText = "চ্যাট ক্লিয়ার হচ্ছে...";
+      const messagesRef = collection(db, 'rooms', chatRoomId, 'messages');
+      const querySnapshot = await getDocs(messagesRef);
+      
+      // লুপ চালিয়ে ডাটাবেসের ওই রুমের প্রতিটি ডকুমেন্ট ডিলিট করা
+      const deletePromises = [];
+      querySnapshot.forEach((msgDoc) => {
+        deletePromises.push(deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgDoc.id)));
+      });
+      
+      await Promise.all(deletePromises);
+      document.getElementById('typing').innerText = "";
+      alert("চ্যাট হিস্ট্রি সফলভাবে ক্লিয়ার করা হয়েছে!");
+    } catch (error) {
+      document.getElementById('typing').innerText = "";
+      alert("চ্যাট ক্লিয়ার করতে সমস্যা হয়েছে: " + error.message);
+    }
   }
 }
 
