@@ -1,142 +1,180 @@
-/* গ্লোবাল স্টাইল ও রিসেট */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-  background-color: #0b141a;
-  color: #e9edef;
-  font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+/* গ্লোবাল রিসেট এবং মোবাইল ভিউপোর্ট ফিক্স */
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* চ্যাট বডি লেআউট ফিক্স (মোবাইলের জন্য অত্যন্ত গুরুত্বপূর্ণ) */
+html, body {
+  height: 100%;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #0b1a24; /* ছবির মতো ডার্ক ব্লু-ব্ল্যাক ব্যাকগ্রাউন্ড */
+}
+
 .chat-body {
   display: flex;
   flex-direction: column;
-  position: fixed;
+  position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
 }
 
-/* --- ১. লগইন পেজ ডিজাইন --- */
-.login-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(135deg, #0f1c24 0%, #0b141a 100%);
-}
-.login-card {
-  background: rgba(34, 46, 53, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 40px 30px;
-  border-radius: 20px;
-  width: 90%;
-  max-width: 380px;
-  text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-}
-.login-card h2 { color: #00a884; font-size: 32px; margin-bottom: 8px; }
-.login-card p { color: #8696a0; font-size: 14px; margin-bottom: 30px; }
-.login-card input {
-  width: 100%; padding: 14px 16px; margin-bottom: 20px;
-  background: #2a3942; border: 1px solid transparent; border-radius: 8px;
-  color: #fff; font-size: 16px; outline: none; transition: 0.3s;
-}
-.login-card input:focus { border-color: #00a884; }
-.login-card button {
-  width: 100%; padding: 14px; background: #00a884; color: #111b21;
-  border: none; border-radius: 8px; font-size: 16px; font-weight: bold;
-  cursor: pointer; transition: 0.2s;
-}
-
-/* --- ২. চ্যাট পেজ ডিজাইন --- */
+/* --- চ্যাট হেডার স্টাইল --- */
 .chat-header {
-  background-color: #202c33; 
-  height: 60px; 
+  background-color: #182a36; /* ডিপ নেভি ব্লু */
+  height: 75px;
   padding: 0 16px;
-  display: flex; 
-  justify-content: space-between; 
+  padding-top: env(safe-area-inset-top); /* আইফোনের নচ ফিক্স */
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  z-index: 10;
 }
-.user-info { display: flex; align-items: center; gap: 12px; }
-.avatar { width: 40px; height: 40px; background: #00a884; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-#chatWithTitle { font-weight: 600; font-size: 16px; color: #e9edef; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.back-btn { background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; padding: 4px; }
+.avatar { 
+  width: 44px; height: 44px; 
+  background: #385a6f; color: #fff; 
+  border-radius: 50%; display: flex; 
+  align-items: center; justify-content: center; 
+  font-size: 18px; font-weight: bold;
+}
+.user-details { display: flex; flex-direction: column; }
+#chatWithTitle { font-weight: 600; font-size: 16px; color: #ffffff; }
 #status { font-size: 12px; margin-top: 2px; }
-.status-online { color: #00a884; font-weight: 500; }
-.status-offline { color: #8696a0; }
-.btn-logout { background: rgba(255,255,255,0.1); border: none; color: #fff; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+.status-text { color: #8fa0ac; }
+.status-online { color: #00e676 !important; font-weight: 500; }
 
-/* মেসেজ এরিয়া মোবাইল স্ক্রোলের জন্য কনফিগারড */
+.btn-clear-chat {
+  background: rgba(255, 255, 255, 0.05); border: none; 
+  color: #fff; padding: 6px 14px; border-radius: 20px; 
+  font-size: 13px; cursor: pointer; transition: 0.2s;
+}
+.btn-clear-chat:active { background: rgba(255, 255, 255, 0.15); }
+
+/* --- মেসেজ এরিয়া --- */
 .message-area {
-  flex: 1; 
-  overflow-y: auto; 
-  padding: 15px;
-  display: flex; 
-  flex-direction: column; 
-  gap: 10px;
-  background-image: radial-gradient(#152026 1px, transparent 1px);
-  background-size: 20px 20px;
-  -webkit-overflow-scrolling: touch; /* আইওএস স্মুথ স্ক্রোল */
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background-color: #0b1a24;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* মেসেজ বাবল */
+/* --- মডার্ন মেসেজ বাবল (ছবির মতো রাউন্ডেড ডিজাইন) --- */
 .message {
-  max-width: 80%; padding: 8px 12px; border-radius: 10px;
-  font-size: 15px; position: relative; word-wrap: break-word;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3); display: flex; flex-direction: column;
+  max-width: 75%;
+  padding: 12px 16px;
+  font-size: 15px;
+  line-height: 1.5;
+  position: relative;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
-.user-tag { font-size: 11px; font-weight: 600; color: #00a884; margin-bottom: 4px; }
-.me { background-color: #005c4b; align-self: flex-end; border-top-right-radius: 0; color: #e9edef; }
-.other { background-color: #202c33; align-self: flex-start; border-top-left-radius: 0; color: #e9edef; }
 
-/* রিপ্লাই ও রিয়্যাকশন */
+/* নিজের পাঠানো মেসেজ (ডানদিকে - নীল বাবল) */
+.me {
+  background-color: #0062e3; /* ছবির মতো উজ্জ্বল রয়েল ব্লু */
+  color: #ffffff;
+  align-self: flex-end;
+  border-radius: 18px 18px 4px 18px; /* আধুনিক মেসেজ কর্নার */
+}
+.me .user-tag { color: #a6ccff; }
+
+/* অপর পাশের মেসেজ (বামদিকে - ডার্ক বাবল) */
+.other {
+  background-color: #182a36; /* ছবির মতো ডার্ক গ্রে-ব্লু */
+  color: #ffffff;
+  align-self: flex-start;
+  border-radius: 18px 18px 18px 4px;
+}
+.other .user-tag { color: #00a884; }
+
+.user-tag { font-size: 10px; font-weight: bold; margin-bottom: 4px; display: none; /* ক্লিন লুকের জন্য ইমেইল ট্যাগটি হাইড রাখা হয়েছে, চাইলে ব্লক করতে পারেন */ }
+
+/* রিপ্লাই এবং রিয়্যাকশন */
 .inside-reply {
-  font-size: 12px; background: rgba(0,0,0,0.2); padding: 6px;
-  border-left: 3px solid #00a884; margin-bottom: 6px; border-radius: 4px; color: #d1d7db;
+  font-size: 12px; background: rgba(0,0,0,0.15); padding: 6px 10px;
+  border-left: 3px solid #0062e3; margin-bottom: 6px; border-radius: 6px; color: #cbd5e1;
 }
 .badge-reaction {
-  align-self: flex-start; background: #2a3942; padding: 2px 6px;
-  border-radius: 10px; font-size: 12px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.05); cursor: pointer;
+  align-self: flex-start; background: #263947; padding: 2px 8px;
+  border-radius: 12px; font-size: 13px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.05);
 }
 
-.action-links { display: flex; gap: 10px; margin-top: 6px; font-size: 11px; color: #8696a0; opacity: 0.8; }
+.action-links { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: #8fa0ac; opacity: 0.6; }
 .action-links span { cursor: pointer; }
-.del-admin { color: #ef4444 !important; }
+.del-admin { color: #ff5252 !important; }
 
-.meta-data { font-size: 10px; color: #8696a0; text-align: right; margin-top: 4px; }
-.seen-blue { color: #53bdeb; }
+.meta-data { font-size: 10px; color: rgba(255, 255, 255, 0.5); text-align: right; margin-top: 4px; }
+.seen-blue { color: #40c4ff; }
 
-/* বটম ইনপুট এরিয়া ফিক্স */
-.action-indicator { padding: 4px 16px; font-size: 13px; color: #00a884; font-style: italic; min-height: 22px; background: #0b141a; flex-shrink: 0; }
-.bottom-input-bar { 
-  display: flex; 
-  align-items: center; 
-  padding: 8px; 
-  background: #202c33; 
-  gap: 8px; 
-  position: relative;
+/* --- চ্যাট ইনপুট বার (ছবির মতো গোল ক্যাপসুল ডিজাইন) --- */
+.action-indicator { padding: 2px 20px; font-size: 13px; color: #00e676; font-style: italic; min-height: 18px; background: #0b1a24; }
+
+.bottom-input-bar {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  background: #0b1a24;
+  gap: 10px;
   flex-shrink: 0;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom)); /* মডার্ন ফুল স্ক্রিন মোবাইলের জন্য */
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
-.bottom-input-bar input {
-  flex: 1; padding: 12px 16px; background: #2a3942; border: none;
-  border-radius: 22px; color: #fff; font-size: 16px; outline: none;
-}
-.bottom-input-bar button {
-  border: none; width: 42px; height: 42px; border-radius: 50%;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
-}
-.icon-btn { background: transparent; color: #8696a0; }
-.btn-send { background: #00a884; color: #111b21; }
-.btn-voice { background: #2a3942; color: #8696a0; }
 
-/* ইমোজি পপআপ */
+/* বামদিকের ইনপুট ক্যাপসুল বক্স */
+.input-container-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #1c2e3a; /* ছবির মতো ইনপুট ব্যাকগ্রাউন্ড */
+  padding: 4px 12px;
+  border-radius: 25px;
+}
+.input-container-box input {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px 8px;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+.input-container-box input::placeholder { color: #697d8a; }
+
+.input-icon-btn {
+  background: none; border: none; color: #697d8a; font-size: 20px;
+  cursor: pointer; padding: 4px; display: flex; align-items: center;
+}
+
+/* ডানদিকের গোল সেন্ড বাটন */
+.btn-send-modern {
+  width: 46px; height: 46px;
+  background-color: #0062e3; /* ছবির মতো নীল সেন্ড আইকন */
+  border: none; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; cursor: pointer; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 98, 227, 0.3);
+}
+.btn-send-modern svg { width: 20px; height: 20px; margin-left: 2px; }
+.btn-send-modern:active { transform: scale(0.95); }
+
+/* ইমোজি মেনু */
 .emoji-popup {
-  position: absolute; bottom: 65px; left: 10px; background: #222e35;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;
-  display: none; gap: 12px; font-size: 22px; z-index: 100; border: 1px solid rgba(255,255,255,0.05);
+  position: absolute; bottom: 80px; left: 16px; background: #1c2e3a;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3); padding: 12px; border-radius: 12px;
+  display: none; gap: 14px; font-size: 22px; z-index: 100;
 }
 .emoji-popup span { cursor: pointer; }
