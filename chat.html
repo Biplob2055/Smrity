@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>WhatsApp Dark Chat</title>
+  <title>WhatsApp Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-body">
@@ -15,7 +15,7 @@
       </button>
       <div class="avatar-wa">M</div>
       <div class="user-info-wa">
-        <h3 id="chatWithTitle">Mohammad Sanwar</h3>
+        <h3 id="chatWithTitle">Loading...</h3>
         <span id="status" class="status-wa">online</span>
       </div>
     </div>
@@ -27,7 +27,6 @@
 
   <div id="messages" class="message-area-wa">
     <div class="date-divider-wa"><span>Today</span></div>
-    
     <div id="actualMessages" class="actual-msg-wrapper-wa"></div>
   </div>
 
@@ -37,14 +36,12 @@
     <div class="wa-input-wrapper">
       <button class="wa-icon-btn" onclick="toggleEmojiMenu()">😊</button>
       <input id="messageInput" placeholder="Message" oninput="emitTyping()">
-      <button class="wa-icon-btn">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-3.31 2.69-6 6-6s6 2.69 6 6v11.5c0 4.69-3.81 8.5-8.5 8.5S3.5 21.19 3.5 16.5V6H5v10.5c0 3.59 2.91 6.5 6.5 6.5s6.5-2.91 6.5-6.5V5c0-2.48-2.02-4.5-4.5-4.5S9 2.52 9 5v12.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V6h1.5z"/></svg>
-      </button>
+      <button class="wa-icon-btn">📎</button>
       <button class="wa-icon-btn" style="margin-left: 5px;">📷</button>
     </div>
     
-    <button class="send-btn-wa" onclick="sendMessage()" id="sendVoiceTrigger">
-      <svg id="sendIconSvg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    <button class="send-btn-wa" onclick="sendMessage()">
+      <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
 
     <div id="emojiMenu" class="emoji-popup-wa">
