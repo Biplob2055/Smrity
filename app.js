@@ -12,7 +12,7 @@ let replyText = "";
 let currentSelectedMsgId = null;
 
 const ADMIN_EMAIL = "sanwarhossain2055@gmail.com"; 
-const USER_EMAIL = "nightq1181@gmail.com"; // আপনার অপর ইউজারের সঠিক ইমেইল আইডি
+const USER_EMAIL = "nightq1181@gmail.com"; 
 
 /* ---------------- ১. লগইন এবং সেশন কন্ট্রোল ---------------- */
 window.login = async function() {
@@ -51,21 +51,15 @@ document.addEventListener("visibilitychange", async () => {
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUserEmail = user.email;
-    
     chatPartnerEmail = (currentUserEmail === ADMIN_EMAIL) ? USER_EMAIL : ADMIN_EMAIL;
     
-    // হেডারে চ্যাট পার্টনারের নাম বা ইমেইল সেট করা
+    // হেডারে চ্যাট পার্টনারের নাম সেট করা
     const titleEl = document.getElementById('chatWithTitle');
-    if(titleEl) {
-      // ইমেইল বড় হলে শুধু আগের অংশ বা পুরো নাম দেখাতে পারেন
-      titleEl.innerText = chatPartnerEmail.split('@')[0]; 
-    }
+    if(titleEl) titleEl.innerText = chatPartnerEmail.split('@')[0]; 
 
-    // প্রোফাইল এভাটার বা লোগোতে প্রথম অক্ষর বসানো
-    const avatarEl = document.querySelector('.avatar');
-    if(avatarEl) {
-      avatarEl.innerText = chatPartnerEmail.charAt(0).toUpperCase();
-    }
+    // প্রোফাইল আইকনে নামের প্রথম অক্ষর দেওয়া
+    const avatarEl = document.querySelector('.avatar-gemini');
+    if(avatarEl) avatarEl.innerText = chatPartnerEmail.charAt(0).toUpperCase();
 
     chatRoomId = currentUserEmail < chatPartnerEmail 
       ? `${currentUserEmail.replace(/[.@]/g, '_')}_${chatPartnerEmail.replace(/[.@]/g, '_')}`
@@ -92,33 +86,45 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/* ---------------- ৪. লাইভ টাইপিং ও অনলাইন স্ট্যাটাস লিসেনার ---------------- */
 function listenPartnerStatus() {
   onSnapshot(doc(db, "users", chatPartnerEmail), (snap) => {
     const statusEl = document.getElementById('status');
-    if (statusEl && snap.exists()) {
+    const typingIndicatorEl = document.getElementById('typing'); 
+    
+    if (snap.exists()) {
       const data = snap.data();
+      
       if (data.typing) {
-        statusEl.innerText = "typing...";
-        statusEl.className = "status-online"; // সবুজ রঙ হবে
+        if (statusEl) { statusEl.innerText = "typing..."; statusEl.className = "status-online"; }
+        if (typingIndicatorEl) { typingIndicatorEl.innerText = "Partner is typing..."; }
       } else if (data.online) {
-        statusEl.innerText = "Online";
-        statusEl.className = "status-online"; // সবুজ রঙ হবে
+        if (statusEl) { statusEl.innerText = "Online"; statusEl.className = "status-online"; }
+        if (typingIndicatorEl) { typingIndicatorEl.innerText = ""; }
       } else {
-        statusEl.innerText = "Offline";
-        statusEl.className = "status-text"; // সাধারণ ধূসর রঙ হবে
+        if (statusEl) { statusEl.innerText = "Offline"; statusEl.className = "status-text"; }
+        if (typingIndicatorEl) { typingIndicatorEl.innerText = ""; }
       }
     }
   });
 }
 
-/* ---------------- ৪. মেসেজ লোড ও রিয়্যাল-টাইম সিন সিস্টেম ---------------- */
+/* ---------------- ۵. মেসেজ লোড ও রিয়্যাল-টাইম সিন সিস্টেম ---------------- */
 function loadPrivateChatMessages() {
   if (!chatRoomId) return;
   const q = query(collection(db, 'rooms', chatRoomId, 'messages'), orderBy('time'));
   
   onSnapshot(q, (snap) => {
-    const box = document.getElementById('messages');
+    const welcomeBox = document.getElementById('welcomeBox');
+    const box = document.getElementById('actualMessages');
     if (!box) return;
+    
+    if(snap.size > 0) {
+      if(welcomeBox) welcomeBox.style.display = "none";
+    } else {
+      if(welcomeBox) welcomeBox.style.display = "block";
+    }
+
     box.innerHTML = "";
 
     snap.forEach((d) => {
@@ -142,7 +148,7 @@ function loadPrivateChatMessages() {
       } else {
         let formattedText = data.text || "";
         const urlRegex = /(https?:\/\/[^\s]+)/g;
-        formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #40c4ff; text-decoration: underline;">${url}</a>`);
+        formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #0b57d0; text-decoration: underline;">${url}</a>`);
         contentHTML = `<div class="msg-content">${formattedText}</div>`;
       }
 
@@ -168,12 +174,15 @@ function loadPrivateChatMessages() {
 
       box.appendChild(div);
     });
-    // নতুন মেসেজ আসলে নিচে স্মুথ স্ক্রোল হবে
-    setTimeout(() => { box.scrollTop = box.scrollHeight; }, 100);
+    
+    setTimeout(() => {
+      const mainArea = document.getElementById('messages');
+      if(mainArea) mainArea.scrollTop = mainArea.scrollHeight;
+    }, 100);
   });
 }
 
-/* ---------------- ৫. মেসেজ পাঠানো ---------------- */
+/* ---------------- ৬. মেসেজ পাঠানো ---------------- */
 window.sendMessage = async function() {
   const input = document.getElementById('messageInput');
   const messageText = input.value.trim();
@@ -193,15 +202,12 @@ window.sendMessage = async function() {
     replyText = "";
     document.getElementById('typing').innerText = "";
     await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
-    
-    const box = document.getElementById('messages');
-    if(box) box.scrollTop = box.scrollHeight;
   } catch (error) {
     alert("মেসেজ পাঠানো যায়নি: " + error.message);
   }
 }
 
-/* ---------------- ৬. Typing Indicator লজিক ---------------- */
+/* ---------------- ७. Typing Indicator ট্রিগার লজিক ---------------- */
 let typingDelayTimer;
 window.emitTyping = function() {
   if (!currentUserEmail) return;
@@ -212,7 +218,7 @@ window.emitTyping = function() {
   }, 2000); 
 }
 
-/* ---------------- ७. Reply এবং Emoji Reaction সিস্টেম ---------------- */
+/* ---------------- ৮. Reply এবং Emoji Reaction সিস্টেম ---------------- */
 window.triggerReply = function(text) {
   replyText = text;
   document.getElementById('typing').innerText = "Replying to: " + text;
@@ -239,18 +245,22 @@ window.toggleEmojiMenu = function() {
   menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
 }
 
-/* ---------------- ৮. একক Message Delete ---------------- */
+/* ---------------- ৯. একক Message Delete ---------------- */
 window.deleteTargetMsg = async function(msgId) {
   if (confirm("আপনি কি এই মেসেজটি সবার জন্য ডিলিট করতে চান?")) {
-    await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
+    try {
+      await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
+    } catch (error) {
+      alert("মেসেজ ডিলিট করা যায়নি: " + error.message);
+    }
   }
 }
 
-/* ---------------- ৯. সমস্ত মেসেজ একসাথে ক্লিয়ার করা ---------------- */
+/* ---------------- ১০. সমস্ত মেসেজ একসাথে ক্লিয়ার করা ---------------- */
 window.clearAllMessages = async function() {
   if (!chatRoomId) return;
   
-  if (confirm("আপনি কি এই চ্যাটের সমস্ত মেসেজ স্থায়ীভাবে মুছে ফেলতে চান? (এটি আর ফিরিয়ে আনা যাবে না)")) {
+  if (confirm("আপনি কি এই চ্যাটের সমস্ত মেসেজ স্থায়ীভাবে মুছে ফেলতে চান?")) {
     try {
       document.getElementById('typing').innerText = "চ্যাট ক্লিয়ার হচ্ছে...";
       const messagesRef = collection(db, 'rooms', chatRoomId, 'messages');
@@ -263,7 +273,6 @@ window.clearAllMessages = async function() {
       
       await Promise.all(deletePromises);
       document.getElementById('typing').innerText = "";
-      alert("চ্যাট হিস্ট্রি সফলভাবে ক্লিয়ার করা হয়েছে!");
     } catch (error) {
       document.getElementById('typing').innerText = "";
       alert("চ্যাট ক্লিয়ার করতে সমস্যা হয়েছে: " + error.message);
@@ -271,7 +280,7 @@ window.clearAllMessages = async function() {
   }
 }
 
-/* ---------------- ১০. ভয়েস মেসেজ রেকর্ডিং ---------------- */
+/* ---------------- ১১. ভয়েস মেসেজ রেকর্ডিং ---------------- */
 let mediaRecorder;
 let voiceChunks = [];
 window.startRecording = async function() {
@@ -307,13 +316,13 @@ window.startRecording = async function() {
   }
 }
 
-/* ---------------- ১১. MOBILE KEYBOARD FIX ---------------- */
+/* ---------------- ১২. MOBILE KEYBOARD FIX ---------------- */
 const inputField = document.getElementById('messageInput');
 if(inputField) {
   inputField.addEventListener('focus', () => {
     setTimeout(() => {
-      const box = document.getElementById('messages');
-      if(box) box.scrollTop = box.scrollHeight;
+      const mainArea = document.getElementById('messages');
+      if(mainArea) mainArea.scrollTop = mainArea.scrollHeight;
     }, 200);
   });
 }
