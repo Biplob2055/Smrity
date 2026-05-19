@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Premium WhatsApp Chat</title>
+  <title>Premium Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-body">
@@ -20,14 +20,13 @@
       </div>
     </div>
     <div class="header-right-wa">
-      <button onclick="clearAllMessages()" class="btn-clear-wa">Clear</button>
+      <button onclick="clearAllMessages()" class="btn-clear-wa">Clear All</button>
       <button class="menu-dots-wa">⋮</button>
     </div>
   </div>
 
   <div id="messages" class="message-area-wa">
     <div class="date-divider-wa"><span>Today</span></div>
-    
     <div id="actualMessages" class="actual-msg-wrapper-wa"></div>
   </div>
 
@@ -36,9 +35,8 @@
   <div class="bottom-input-bar-wa">
     <div class="wa-input-wrapper">
       <button class="wa-icon-btn" onclick="toggleEmojiMenu()">😊</button>
-      <input id="messageInput" placeholder="Message" oninput="emitTyping()">
+      <input id="messageInput" placeholder="Message..." oninput="emitTyping()">
       <button class="wa-icon-btn">📎</button>
-      <button class="wa-icon-btn" style="margin-left: 5px;">📷</button>
     </div>
     
     <button class="send-btn-wa" onclick="sendMessage()">
