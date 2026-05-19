@@ -1,4 +1,4 @@
-/* গ্লোবাল সেটিংস এবং মোবাইল স্ক্রিন লক */
+/* গলোবাল রিসেট */
 * { 
   box-sizing: border-box; 
   margin: 0; 
@@ -7,16 +7,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* পুরো স্ক্রিন লক এবং ডাইনামিক হাইট ফিক্স */
 html, body {
   height: 100%;
-  height: 100dvh; /* মোবাইলের ডাইনামিক কিবোর্ড হাইট ফিক্স */
+  height: 100dvh; /* কিবোর্ড ওপেন হলে স্ক্রিন ডাইনামিকালি ছোট হবে */
   width: 100%;
   overflow: hidden;
   background-color: #0b141a;
   color: #e9edef;
 }
 
-/* ================== ১. লগইন স্ক্রিন (প্রিমিয়াম কার্ড ডিজাইন) ================== */
+/* লগইন ইন্টারফেস ডিজাইন */
 .login-body {
   display: flex;
   justify-content: center;
@@ -26,12 +27,12 @@ html, body {
 }
 .login-card-premium {
   width: 100%;
-  max-width: 380px;
+  max-width: 360px;
   background-color: #1f2c34;
-  padding: 35px 25px;
+  padding: 40px 25px;
   border-radius: 20px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
   border: 1px solid rgba(255,255,255,0.05);
 }
 .brand-logo-wa { color: #00a884; margin-bottom: 15px; }
@@ -40,10 +41,10 @@ html, body {
 .input-group-premium { margin-bottom: 20px; }
 .input-group-premium input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 15px 16px;
   background-color: #2a3942;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 12px;
   color: #fff;
   font-size: 16px;
   outline: none;
@@ -53,28 +54,26 @@ html, body {
 .input-group-premium input:focus { border-color: #00a884; }
 .btn-login-premium {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   background-color: #00a884;
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;
   transition: 0.2s;
 }
-.btn-login-premium:active { transform: scale(0.98); }
 
-
-/* ================== ২. চ্যাট স্ক্রিন লেআউট ================== */
+/* চ্যাট স্ক্রিন মেইন লেআউট */
 .chat-body {
   display: flex;
   flex-direction: column;
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  height: 100dvh;
+  position: relative;
 }
 
-/* হেডার আর্কিটেকচার */
+/* হেডার */
 .chat-header-wa {
   height: 62px;
   padding: 0 12px;
@@ -82,94 +81,59 @@ html, body {
   justify-content: space-between;
   align-items: center;
   background-color: #1f2c34;
-  flex-shrink: 0;
+  flex-shrink: 0; /* হেডার যাতে কিবোর্ডের চাপে ছোট না হয় */
   z-index: 10;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 .header-left { display: flex; align-items: center; gap: 10px; }
-.back-btn-wa, .menu-dots-wa { background: none; border: none; color: #aebac1; cursor: pointer; display: flex; align-items: center; font-size: 20px; }
+.back-btn-wa, .menu-dots-wa { background: none; border: none; color: #aebac1; font-size: 20px; cursor: pointer; }
 .avatar-wa {
   width: 40px; height: 40px; background: #6a7b83; color: #fff;
-  border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-weight: bold; font-size: 16px;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;
 }
-.user-info-wa h3 { font-size: 16px; font-weight: 500; color: #e9edef; }
+.user-info-wa h3 { font-size: 16px; color: #e9edef; }
 .user-info-wa span { font-size: 12px; color: #8696a0; }
-.status-online-wa { color: #53bdeb !important; }
+.header-right-wa { display: flex; align-items: center; gap: 12px; }
+.btn-clear-wa { background: rgba(239, 83, 80, 0.2); border: none; color: #ef5350; padding: 6px 12px; border-radius: 15px; font-size: 11px; cursor: pointer; }
 
-.header-right-wa { display: flex; align-items: center; gap: 14px; }
-.btn-clear-wa {
-  background: rgba(239, 83, 80, 0.15); border: none; color: #ef5350; 
-  padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;
-}
-
-/* মেসেজ স্ক্রিন ব্যাকগ্রাউন্ড এবং ডডল এফেক্ট */
+/* মেসেজ এরিয়া - যা কিবোর্ড উঠলে অটোমেটিক ছোট হয়ে যাবে */
 .message-area-wa {
   flex: 1;
   overflow-y: auto;
   padding: 15px;
   display: flex;
   flex-direction: column;
-  -webkit-overflow-scrolling: touch;
   background-color: #0b141a;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
-  background-size: 24px 24px;
+  -webkit-overflow-scrolling: touch;
 }
-.date-divider-wa { text-align: center; margin: 10px 0 15px 0; }
-.date-divider-wa span { background: #182229; color: #8696a0; padding: 5px 12px; border-radius: 7px; font-size: 11px; }
+.date-divider-wa { text-align: center; margin: 10px 0; }
+.date-divider-wa span { background: #182229; color: #8696a0; padding: 4px 10px; border-radius: 6px; font-size: 11px; }
+.actual-msg-wrapper-wa { display: flex; flex-direction: column; gap: 10px; }
 
-.actual-msg-wrapper-wa { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-
-/* মেসেজ বাবল সেটিংস */
-.message {
-  max-width: 78%;
-  padding: 8px 14px;
-  font-size: 16px;
-  line-height: 1.4;
-  word-wrap: break-word;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.15);
-}
-.other {
-  background-color: #202c33;
-  color: #e9edef;
-  align-self: flex-start;
-  border-radius: 0px 12px 12px 12px;
-}
-.me {
-  background-color: #005c4b;
-  color: #e9edef;
-  align-self: flex-end;
-  border-radius: 12px 0px 12px 12px;
-}
-
-.action-links { display: flex; gap: 8px; margin-top: 4px; font-size: 11px; color: #8696a0; }
-.action-links span { cursor: pointer; }
-.del-admin { color: #ef5350 !important; }
+/* মেসেজ বাবল */
+.message { max-width: 80%; padding: 10px 14px; font-size: 16px; line-height: 1.4; word-wrap: break-word; position: relative; display: flex; flex-direction: column; }
+.other { background-color: #202c33; color: #e9edef; align-self: flex-start; border-radius: 0 12px 12px 12px; }
+.me { background-color: #005c4b; color: #e9edef; align-self: flex-end; border-radius: 12px 0 12px 12px; }
+.action-links { display: flex; gap: 8px; font-size: 11px; color: #8696a0; margin-top: 4px; }
 .meta-data { font-size: 10px; color: #8696a0; text-align: right; margin-top: 2px; }
-.seen-blue { color: #53bdeb; font-weight: bold; }
-.inside-reply { font-size: 12px; background: rgba(0,0,0,0.15); padding: 5px 8px; border-left: 3px solid #00a884; margin-bottom: 4px; border-radius: 4px; color: #d1d7db; }
-.badge-reaction { align-self: flex-start; background: #202c33; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-top: 2px; }
+.seen-blue { color: #53bdeb; }
+.inside-reply { font-size: 12px; background: rgba(0,0,0,0.2); padding: 4px 6px; border-left: 3px solid #00a884; margin-bottom: 4px; color: #d1d7db; }
+.badge-reaction { background: #202c33; padding: 2px 6px; border-radius: 10px; font-size: 11px; align-self: flex-start; }
 
+/* টাইপিং টেক্সট স্পেস */
+.action-indicator-wa { padding: 2px 20px; font-size: 12px; color: #00a884; min-height: 16px; background-color: #0b141a; flex-shrink: 0; }
 
-/* ================== ৩. জেমিনি স্টাইল ফ্লোটিং ইনপুট বার ഫിക്സ് ================== */
-.action-indicator-wa { padding: 2px 20px; font-size: 12px; color: #00a884; min-height: 16px; background-color: #0b141a; }
-
-/* মেইন বটম কন্টেইনার - কিবোর্ড উঠলে এর ওপরে সুন্দরভাবে পজিশন লক হবে */
+/* জেমিনি স্টাইল ফ্লোটিং ইনপুট কন্টেইনার */
 .bottom-input-bar-wa {
   padding: 10px 14px;
   background-color: #0b141a;
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
-  position: relative;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* নচ ও বটম বার সেফটি স্পেস */
+  flex-shrink: 0; /* কিবোর্ড এটাকে চাপ দিয়ে ছোট করতে পারবে না */
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 
-/* জেমিনির মতো ওভাল ক্যাপসুল ও চওড়া ইনপুট এরিয়া */
+/* ওভাল ক্যাপসুল ইনপুট বক্স */
 .wa-input-wrapper {
   background-color: #202c33;
   border-radius: 28px;
@@ -177,39 +141,37 @@ html, body {
   display: flex;
   align-items: center;
   flex: 1;
-  min-height: 52px; /* ইনপুট বারটি এখন যথেষ্ট বড় দেখাবে */
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  min-height: 54px; /* জেমিনির মতো বড় ও চওড়া সাইজ */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
 }
 .wa-input-wrapper input {
   flex: 1;
   border: none;
   background: none;
-  padding: 12px 6px;
+  padding: 12px 4px;
   font-size: 16px;
   color: #e9edef;
   outline: none;
   width: 100%;
 }
-.wa-input-wrapper input::placeholder { color: #8696a0; }
-.wa-icon-btn { background: none; border: none; color: #8696a0; cursor: pointer; font-size: 20px; display: flex; align-items: center; padding: 4px; }
 
-/* গোল ফিক্সড সেন্ড বাটন - কিবোর্ডের চাপে ছোট বা স্ক্রিনের বাইরে যাবে না */
+/* গোল ডাইনামিক সেন্ড বাটন - এটি সবসময় স্ক্রিনের ভেতরে দৃশ্যমান থাকবে */
 .send-btn-wa {
   background-color: #00a884;
-  color: #ffffff;
+  color: #fff;
   border: none;
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  flex-shrink: 0; /* গোল শেপ লক রাখবে, চ্যাপ্টা হবে না */
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  flex-shrink: 0; /* বাটনটির গোল শেপ লক রাখবে */
+  cursor: pointer;
 }
-.send-btn-wa:active { transform: scale(0.95); }
-.send-btn-wa svg { width: 22px; height: 22px; display: block; }
+.send-btn-wa svg { display: block; width: 22px; height: 22px; }
 
-.emoji-popup-wa { position: absolute; bottom: 85px; left: 15px; background: #233138; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 10px; border-radius: 12px; display: none; gap: 12px; font-size: 22px; z-index: 100; }
+/* ইমোজি পপআপ */
+.emoji-popup-wa { position: absolute; bottom: 85px; left: 15px; background: #233138; padding: 10px; border-radius: 12px; display: none; gap: 12px; font-size: 22px; z-index: 100; }
 .emoji-popup-wa span { cursor: pointer; }
