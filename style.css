@@ -1,9 +1,9 @@
-/* গ্লোবাল সেটিংস */
+/* গ্লোবাল সেটিংস এবং কিবোর্ড ওভারফ্লো প্রোটেকশন */
 * { 
   box-sizing: border-box; 
   margin: 0; 
   padding: 0; 
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -12,10 +12,60 @@ html, body {
   height: 100dvh; /* মোবাইলের ডাইনামিক কিবোর্ড হাইট ফিক্স */
   width: 100%;
   overflow: hidden;
-  background-color: #0b141a; /* অফিশিয়াল হোয়াটসঅ্যাপ ডার্ক ব্যাকগ্রাউন্ড */
+  background-color: #0b141a;
   color: #e9edef;
 }
 
+/* --- ১. লগইন স্ক্রিন ডিজাইন (সম্পূর্ণ নতুন লাক্সারি কার্ড) --- */
+.login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at center, #1f2c34 0%, #0b141a 100%);
+  padding: 20px;
+}
+.login-card-premium {
+  width: 100%;
+  max-width: 380px;
+  background-color: #1f2c34;
+  padding: 35px 25px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+.brand-logo-wa { color: #00a884; margin-bottom: 15px; }
+.login-card-premium h2 { font-size: 24px; font-weight: 600; margin-bottom: 8px; color: #fff; }
+.login-card-premium p { font-size: 13px; color: #8696a0; margin-bottom: 25px; }
+.input-group-premium { margin-bottom: 20px; }
+.input-group-premium input {
+  width: 100%;
+  padding: 14px 16px;
+  background-color: #2a3942;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+  text-align: center;
+  transition: 0.3s;
+}
+.input-group-premium input:focus { border-color: #00a884; }
+.btn-login-premium {
+  width: 100%;
+  padding: 14px;
+  background-color: #00a884;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-login-premium:active { transform: scale(0.98); }
+
+/* --- ২. চ্যাট রুমের মেইন স্ট্রাকচার --- */
 .chat-body {
   display: flex;
   flex-direction: column;
@@ -23,76 +73,69 @@ html, body {
   top: 0; left: 0; right: 0; bottom: 0;
 }
 
-/* --- হেডার স্টাইল --- */
 .chat-header-wa {
   height: 62px;
   padding: 0 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1f2c34; /* ডার্ক হেডার */
+  background-color: #1f2c34;
   flex-shrink: 0;
   z-index: 10;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
-.header-left { display: flex; align-items: center; gap: 8px; }
+.header-left { display: flex; align-items: center; gap: 10px; }
 .back-btn-wa, .menu-dots-wa { background: none; border: none; color: #aebac1; cursor: pointer; display: flex; align-items: center; font-size: 20px; }
 .avatar-wa {
   width: 40px; height: 40px; background: #6a7b83; color: #fff;
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-weight: bold; font-size: 16px; overflow: hidden;
+  font-weight: bold; font-size: 16px;
 }
 .user-info-wa h3 { font-size: 16px; font-weight: 500; color: #e9edef; }
 .user-info-wa span { font-size: 12px; color: #8696a0; }
 .status-online-wa { color: #53bdeb !important; }
 
-.header-right-wa { display: flex; align-items: center; gap: 16px; }
+.header-right-wa { display: flex; align-items: center; gap: 14px; }
 .btn-clear-wa {
-  background: rgba(255, 255, 255, 0.07); border: none; color: #ef5350; 
+  background: rgba(239, 83, 80, 0.15); border: none; color: #ef5350; 
   padding: 5px 12px; border-radius: 15px; font-size: 12px; cursor: pointer;
 }
 
-/* --- চ্যাট স্ক্রিন এবং স্ক্রিনশটের ব্যাকগ্রাউন্ড প্যাটার্ন --- */
+/* চ্যাট ব্যাকগ্রাউন্ড ডডল প্যাটার্ন */
 .message-area-wa {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 16px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   -webkit-overflow-scrolling: touch;
-  /* স্ক্রিনশটের হালকা ডডল আর্ট এফেক্ট দেওয়ার জন্য নিচের ব্যাকগ্রাউন্ড সেট করা হয়েছে */
   background-color: #0b141a;
   background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
   background-size: 24px 24px;
 }
-
-.date-divider-wa { text-align: center; margin: 10px 0 18px 0; }
-.date-divider-wa span { background: #182229; color: #8696a0; padding: 5px 12px; border-radius: 7px; font-size: 12px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+.date-divider-wa { text-align: center; margin: 10px 0 15px 0; }
+.date-divider-wa span { background: #182229; color: #8696a0; padding: 5px 12px; border-radius: 7px; font-size: 11px; }
 
 .actual-msg-wrapper-wa { display: flex; flex-direction: column; gap: 10px; width: 100%; }
 
-/* --- মেসেজ বাবল ডিজাইন (হুবহু স্ক্রিনশটের কালার ও শেপ) --- */
+/* মেসেজ বাবল ডিজাইন */
 .message {
-  max-width: 80%;
-  padding: 8px 12px;
-  font-size: 15px;
+  max-width: 78%;
+  padding: 8px 14px;
+  font-size: 16px;
   line-height: 1.4;
   word-wrap: break-word;
   position: relative;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.15);
 }
-
-/* ওপার থেকে আসা মেসেজ (ডার্ক থিম গ্রে) */
 .other {
   background-color: #202c33;
   color: #e9edef;
   align-self: flex-start;
   border-radius: 0px 12px 12px 12px;
 }
-
-/* আপনার পাঠানো মেসেজ (হোয়াটসঅ্যাপ ডার্ক গ্রিন) */
 .me {
   background-color: #005c4b;
   color: #e9edef;
@@ -100,68 +143,66 @@ html, body {
   border-radius: 12px 0px 12px 12px;
 }
 
-/* বাবল অ্যাকশন ও মেটা টাইম */
-.action-links { display: flex; gap: 10px; margin-top: 4px; font-size: 11px; color: #8696a0; }
+.action-links { display: flex; gap: 8px; margin-top: 4px; font-size: 11px; color: #8696a0; }
 .action-links span { cursor: pointer; }
 .del-admin { color: #ef5350 !important; }
-
-.meta-data { font-size: 10px; color: #8696a0; text-align: right; margin-top: 2px; align-self: flex-end; }
+.meta-data { font-size: 10px; color: #8696a0; text-align: right; margin-top: 2px; }
 .seen-blue { color: #53bdeb; font-weight: bold; }
-
 .inside-reply { font-size: 12px; background: rgba(0,0,0,0.15); padding: 5px 8px; border-left: 3px solid #00a884; margin-bottom: 4px; border-radius: 4px; color: #d1d7db; }
-.badge-reaction { align-self: flex-start; background: #202c33; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-top: 2px; box-shadow: 0 1px 1px rgba(0,0,0,0.2); }
+.badge-reaction { align-self: flex-start; background: #202c33; padding: 2px 6px; border-radius: 10px; font-size: 11px; margin-top: 2px; }
 
-/* --- বটম ইনপুট ও রাউন্ডেড কিবোর্ড ফিক্স বার --- */
+/* --- ৩. নতুন বড় ও আরামদায়ক ইনপুট এরিয়া ফিক্স --- */
 .action-indicator-wa { padding: 2px 16px; font-size: 12px; color: #00a884; min-height: 16px; background-color: #0b141a; }
 
 .bottom-input-bar-wa {
-  padding: 8px 10px;
+  padding: 10px 12px;
   background-color: #0b141a;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
-  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  position: relative;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* iOS হোম বার ওভারফ্লো ফিক্স */
 }
 
+/* আপনার স্ক্রিনশটের মতো চ্যাট ইনপুট বক্স বড় এবং পরিষ্কার করা হলো */
 .wa-input-wrapper {
   background-color: #202c33;
-  border-radius: 24px;
-  padding: 2px 12px;
+  border-radius: 25px;
+  padding: 6px 14px; /* প্যাডিং বাড়িয়ে ইনপুট বড় করা হয়েছে */
   display: flex;
   align-items: center;
   flex: 1;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .wa-input-wrapper input {
   flex: 1;
   border: none;
   background: none;
-  padding: 10px 6px;
-  font-size: 16px;
+  padding: 10px 6px; /* টেক্সট লেখার জন্য ভেতরে যথেষ্ট বড় জায়গা */
+  font-size: 17px; /* বড় ফন্ট সাইজ */
   color: #e9edef;
   outline: none;
 }
 .wa-input-wrapper input::placeholder { color: #8696a0; }
+.wa-icon-btn { background: none; border: none; color: #8696a0; cursor: pointer; font-size: 20px; display: flex; align-items: center; }
 
-.wa-icon-btn { background: none; border: none; color: #8696a0; cursor: pointer; font-size: 18px; display: flex; align-items: center; }
-
-/* গোল সবুজ রঙের ফিক্সড সেন্ড/মাইক বাটন */
+/* গোল সবুজ সেন্ড বাটন - যা স্ক্রিনের ভেতরেই লক থাকবে */
 .send-btn-wa {
   background-color: #00a884;
   color: #ffffff;
   border: none;
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   flex-shrink: 0;
 }
 .send-btn-wa:active { transform: scale(0.95); }
 
-.emoji-popup-wa { position: absolute; bottom: 75px; left: 15px; background: #233138; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 10px; border-radius: 12px; display: none; gap: 12px; font-size: 22px; z-index: 100; }
+.emoji-popup-wa { position: absolute; bottom: 80px; left: 15px; background: #233138; box-shadow: 0 4px 15px rgba(0,0,0,0.5); padding: 10px; border-radius: 12px; display: none; gap: 12px; font-size: 22px; z-index: 100; }
 .emoji-popup-wa span { cursor: pointer; }
