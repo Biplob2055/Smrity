@@ -3,24 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Smrity Chat - Login</title>
+  <title> General Knowledge- Login</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="login-body">
 
   <div class="login-card">
-    <h2>Job Solution</h2>
-    <p>Learn English with pleasure.</p>
+    <h2>Login</h2>
     
     <div class="input-group">
-      <input id="email" type="email" placeholder="ইমেইল অ্যাড্রেস" required>
+      <input type="email" id="email" placeholder="Email" required>
     </div>
     
     <div class="input-group">
-      <input id="password" type="password" placeholder="পাসওয়ার্ড" required>
+      <input type="password" id="password" placeholder="Password" required>
     </div>
-
-    <button onclick="login()">Log In</button>
+    
+    <button onclick="login()" class="btn-login-submit">Log in</button>
+    
+    <div class="forgot-pass">
+      <a href="#">Forgot password?</a>
+    </div>
   </div>
 
   <script type="module" src="firebase.js"></script>
