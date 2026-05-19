@@ -3,70 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Job Solution Bangla</title>
+  <title>WhatsApp Dark Chat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-body">
 
-  <div class="chat-header-gemini">
+  <div class="chat-header-wa">
     <div class="header-left">
-      <button onclick="logout()" class="menu-btn-gemini">
-        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      <button onclick="logout()" class="back-btn-wa">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
       </button>
-      <span class="brand-title">Gemini</span>
-      <div class="header-status-box">
-        <span id="status" class="status-text">Offline</span>
+      <div class="avatar-wa">M</div>
+      <div class="user-info-wa">
+        <h3 id="chatWithTitle">Mohammad Sanwar</h3>
+        <span id="status" class="status-wa">online</span>
       </div>
     </div>
-    <div class="header-right">
-      <button onclick="clearAllMessages()" class="btn-clear-gemini">Clear All</button>
-      <div class="avatar-gemini">M</div>
+    <div class="header-right-wa">
+      <button onclick="clearAllMessages()" class="btn-clear-wa">Clear</button>
+      <button class="menu-dots-wa">⋮</button>
     </div>
   </div>
 
-  <div id="messages" class="message-area-gemini">
-    <div id="welcomeBox" class="welcome-container">
-      <h1>Hi Mohammad Sanwar,</h1>
-      <h2>Where should we start?</h2>
-      
-      <div class="gemini-suggestion-card">
-        <span>🖼️ Create image</span>
-      </div>
+  <div id="messages" class="message-area-wa">
+    <div class="date-divider-wa"><span>Today</span></div>
+    
+    <div id="actualMessages" class="actual-msg-wrapper-wa"></div>
+  </div>
+
+  <div id="typing" class="action-indicator-wa"></div>
+
+  <div class="bottom-input-bar-wa">
+    <div class="wa-input-wrapper">
+      <button class="wa-icon-btn" onclick="toggleEmojiMenu()">😊</button>
+      <input id="messageInput" placeholder="Message" oninput="emitTyping()">
+      <button class="wa-icon-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-3.31 2.69-6 6-6s6 2.69 6 6v11.5c0 4.69-3.81 8.5-8.5 8.5S3.5 21.19 3.5 16.5V6H5v10.5c0 3.59 2.91 6.5 6.5 6.5s6.5-2.91 6.5-6.5V5c0-2.48-2.02-4.5-4.5-4.5S9 2.52 9 5v12.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V6h1.5z"/></svg>
+      </button>
+      <button class="wa-icon-btn" style="margin-left: 5px;">📷</button>
     </div>
     
-    <div id="actualMessages" class="actual-msg-wrapper"></div>
-  </div>
+    <button class="send-btn-wa" onclick="sendMessage()" id="sendVoiceTrigger">
+      <svg id="sendIconSvg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
 
-  <div id="typing" class="action-indicator-gemini"></div>
-
-  <div class="bottom-input-bar-gemini">
-    <div class="gemini-input-wrapper">
-      <div class="input-row">
-        <input id="messageInput" placeholder="Ask Gemini..." oninput="emitTyping()">
-      </div>
-      <div class="input-actions-row">
-        <div class="left-actions">
-          <button class="gemini-action-btn" onclick="toggleEmojiMenu()">+</button>
-          <button class="gemini-action-btn">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
-          </button>
-        </div>
-        <div class="right-actions">
-          <button class="gemini-action-btn" onclick="startRecording()">🎤</button>
-          <button class="gemini-send-btn" onclick="sendMessage()">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div id="emojiMenu" class="emoji-popup">
+    <div id="emojiMenu" class="emoji-popup-wa">
       <span onclick="appendEmoji('👍')">👍</span>
       <span onclick="appendEmoji('❤️')">❤️</span>
       <span onclick="appendEmoji('😂')">😂</span>
       <span onclick="appendEmoji('😮')">😮</span>
       <span onclick="appendEmoji('😢')">😢</span>
-      <span onclick="appendEmoji('🙏')">🙏</span>
     </div>
   </div>
 
