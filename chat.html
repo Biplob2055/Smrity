@@ -3,40 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Smrity Chat</title>
+  <title>Job Solution Bangla</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-body">
 
-  <div class="chat-header">
+  <div class="chat-header-gemini">
     <div class="header-left">
-      <button onclick="logout()" class="back-btn">←</button>
-      <div class="avatar">S</div>
-      <div class="user-details">
-        <div id="chatWithTitle">Samale Torres</div>
-        <div id="status" class="status-text">Offline</div>
+      <button onclick="logout()" class="menu-btn-gemini">
+        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+      </button>
+      <span class="brand-title">Gemini</span>
+      <div class="header-status-box">
+        <span id="status" class="status-text">Offline</span>
       </div>
     </div>
     <div class="header-right">
-      <button onclick="clearAllMessages()" class="btn-clear-chat">Clear</button>
+      <button onclick="clearAllMessages()" class="btn-clear-gemini">Clear All</button>
+      <div class="avatar-gemini">M</div>
     </div>
   </div>
 
-  <div id="messages" class="message-area"></div>
-
-  <div id="typing" class="action-indicator"></div>
-
-  <div class="bottom-input-bar">
-    <div class="input-container-box">
-      <button class="input-icon-btn" onclick="toggleEmojiMenu()">😊</button>
-      <input id="messageInput" placeholder="Type a message..." oninput="emitTyping()">
-      <button class="input-icon-btn" onclick="startRecording()">📎</button>
+  <div id="messages" class="message-area-gemini">
+    <div id="welcomeBox" class="welcome-container">
+      <h1>Hi Mohammad Sanwar,</h1>
+      <h2>Where should we start?</h2>
+      
+      <div class="gemini-suggestion-card">
+        <span>🖼️ Create image</span>
+      </div>
     </div>
-    <button class="btn-send-modern" onclick="sendMessage()">
-      <svg viewBox="0 0 24 24" fill="currentColor">
-        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-      </svg>
-    </button>
+    
+    <div id="actualMessages" class="actual-msg-wrapper"></div>
+  </div>
+
+  <div id="typing" class="action-indicator-gemini"></div>
+
+  <div class="bottom-input-bar-gemini">
+    <div class="gemini-input-wrapper">
+      <div class="input-row">
+        <input id="messageInput" placeholder="Ask Gemini..." oninput="emitTyping()">
+      </div>
+      <div class="input-actions-row">
+        <div class="left-actions">
+          <button class="gemini-action-btn" onclick="toggleEmojiMenu()">+</button>
+          <button class="gemini-action-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zm-5.04-6.71l-2.75 3.54-1.96-2.36L6.5 17h11l-3.54-4.71z"/></svg>
+          </button>
+        </div>
+        <div class="right-actions">
+          <button class="gemini-action-btn" onclick="startRecording()">🎤</button>
+          <button class="gemini-send-btn" onclick="sendMessage()">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div id="emojiMenu" class="emoji-popup">
       <span onclick="appendEmoji('👍')">👍</span>
