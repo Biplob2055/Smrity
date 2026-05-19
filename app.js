@@ -4,6 +4,8 @@ import {
   collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, deleteDoc, doc, updateDoc, setDoc
 } from './firebase.js';
 import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ফায়ারবেস সেশন কন্ট্রোলের জন্য স্পেশাল ইম্পোর্ট
+import { setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let currentUserEmail = null;
 let chatPartnerEmail = null;
@@ -11,58 +13,59 @@ let chatRoomId = null;
 let replyText = "";
 let currentSelectedMsgId = null;
 
-// 🔒 ফায়ারবেস ব্যাকএন্ডের দুটি ইমেইল (যা ফায়ারবেস Authentication-এ খোলা আছে)
+// 🔒 ফায়ারবেস ব্যাকএন্ডের দুটি ইমেইল
 const PERSON_ONE_EMAIL = "sanwarhossain2055@gmail.com"; 
-const PERSON_TWO_EMAIL = "nightq1181@gmail.com"; 
+const PERSON_TWO_EMAIL = "nightq181@gmail.com"; 
 
-/* ১. শুধু পাসওয়ার্ড দিয়ে দুইজনের আলাদা লগইন লজিক */
+/* ১. শুধু পাসওয়ার্ড দিয়ে দুইজনের আলাদা লগইন লজিক (ট্যাব বন্ধের সুরক্ষাসহ) */
 window.loginWithKey = async function() {
   const password = document.getElementById('accessPassword').value.trim();
   if(!password) return alert("দয়া করে সিকিউরিটি পাসওয়ার্ডটি দিন!");
 
   let targetEmail = "";
 
-  // 🛠️ এখানে আপনি আপনার ইচ্ছামতো পাসওয়ার্ড পরিবর্তন করতে পারেন
   if (password === "553932") {
-    targetEmail = PERSON_ONE_EMAIL; // এই পাসওয়ার্ড দিলে ১ নম্বর ব্যক্তি ঢুকবে
+    targetEmail = PERSON_ONE_EMAIL;
   } else if (password === "861155") {
-    targetEmail = PERSON_TWO_EMAIL; // এই পাসওয়ার্ড দিলে ২ নম্বর ব্যক্তি ঢুকবে
+    targetEmail = PERSON_TWO_EMAIL;
   } else {
     return alert("ভুল পাসওয়ার্ড! আবার চেষ্টা করুন।");
   }
 
   try {
-    // ব্যাকএন্ডে ইমেইল ও পাসওয়ার্ড দিয়ে অটোমেটিক লগইন হবে
+    // 🛡️ ব্রাউজারকে নির্দেশ দেওয়া হচ্ছে যাতে ট্যাব বন্ধ করলেই সেশন ডিলিট হয়ে যায়
+    await setPersistence(auth, browserSessionPersistence);
+    
+    // এরপর লগইন হবে
     await signInWithEmailAndPassword(auth, targetEmail, password);
     window.location = 'chat.html';
   } catch (error) {
-    alert("লগইন ব্যর্থ হয়েছে! ফায়ারবেসে এই পাসওয়ার্ডটি সেট করা আছে তো? এরর: " + error.message);
+    alert("লগইন ব্যর্থ হয়েছে! এরর: " + error.message);
   }
 }
 
+// লগআউট ফাংশন
 window.logout = async function() {
   if (currentUserEmail) {
-    await updateDoc(doc(db, "users", currentUserEmail), { online: false, typing: false });
+    try {
+      await updateDoc(doc(db, "users", currentUserEmail), { online: false, typing: false });
+    } catch(e) { console.log(e); }
   }
   await signOut(auth);
   window.location = 'index.html';
 }
 
-/* ২. চ্যাট রুম কানেকশন কন্ট্রোল */
+/* ২. চ্যাটルーム কানেকশন কন্ট্রোল */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUserEmail = user.email;
-    
-    // ১ নম্বর ব্যক্তি ঢুকলে পার্টনার হবে ২ নম্বর ব্যক্তি, আর ২ নম্বর ঢুকলে পার্টনার হবে ১ নম্বর
     chatPartnerEmail = (currentUserEmail === PERSON_ONE_EMAIL) ? PERSON_TWO_EMAIL : PERSON_ONE_EMAIL;
     
-    // হেডার টাইটেল অটোমেটিক সেট হবে
     const titleEl = document.getElementById('chatWithTitle');
     if(titleEl) {
       titleEl.innerText = (chatPartnerEmail === PERSON_ONE_EMAIL) ? "Mohammad Sanwar" : "Mayaboti";
     }
 
-    // দুইজনের জন্য একটি কমন চ্যাট রুম আইডি তৈরি
     chatRoomId = PERSON_ONE_EMAIL < PERSON_TWO_EMAIL 
       ? `${PERSON_ONE_EMAIL.replace(/[.@]/g, '_')}_${PERSON_TWO_EMAIL.replace(/[.@]/g, '_')}`
       : `${PERSON_TWO_EMAIL.replace(/[.@]/g, '_')}_${PERSON_ONE_EMAIL.replace(/[.@]/g, '_')}`;
@@ -80,6 +83,28 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+/* 🚨 ৩. ব্রাউজার মিনিমাইজ, নতুন ট্যাব ওপেন বা ব্যাকগ্রাউন্ডে গেলে অটো-লগআউট লজিক */
+function handleAutoLogout() {
+  if (currentUserEmail && window.location.pathname.includes('chat.html')) {
+    // ফায়ারবেসে অফলাইন স্ট্যাটাস পাঠিয়ে সাথে সাথে লগআউট করা
+    logout();
+  }
+}
+
+// ইউজার যখন ব্রাউজার মিনিমাইজ করবে বা অন্য ট্যাবে যাবে
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') {
+    handleAutoLogout();
+  }
+});
+
+// ইউজার যখন ব্রাউজারের ট্যাবটি পুরোপুরি কেটে দেবে বা রিফ্রেশ করবে
+window.addEventListener('pagehide', () => {
+  handleAutoLogout();
+});
+
+
+/* ৪. চ্যাট মেসেজ ও অন্যান্য লজিক (অপরিবর্তিত) */
 function listenPartnerStatus() {
   onSnapshot(doc(db, "users", chatPartnerEmail), (snap) => {
     const statusEl = document.getElementById('status');
@@ -161,10 +186,11 @@ window.sendMessage = async function() {
 
 let typingTimer;
 window.emitTyping = function() {
+  if(!currentUserEmail) return;
   updateDoc(doc(db, "users", currentUserEmail), { typing: true });
   clearTimeout(typingTimer);
   typingTimer = setTimeout(() => {
-    updateDoc(doc(db, "users", currentUserEmail), { typing: false });
+    if(currentUserEmail) updateDoc(doc(db, "users", currentUserEmail), { typing: false });
   }, 1500);
 }
 
