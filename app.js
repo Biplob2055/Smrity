@@ -11,6 +11,7 @@ let chatRoomId = null;
 let replyText = "";
 let currentSelectedMsgId = null;
 
+// আপনার চ্যাটের দুটি নির্দিষ্ট ইমেইল আইডি
 const ADMIN_EMAIL = "sanwarhossain2055@gmail.com"; 
 const USER_EMAIL = "nightq1181@gmail.com"; 
 
@@ -36,7 +37,7 @@ window.logout = async function() {
   window.location = 'index.html';
 }
 
-/* ---------------- ২. Minimize করলে অটো লগআউট ---------------- */
+/* ---------------- ২. Minimize বা ব্যাকগ্রাউন্ডে গেলে অটো লগআউট ---------------- */
 document.addEventListener("visibilitychange", async () => {
   if (document.visibilityState === "hidden" && auth.currentUser) {
     if (currentUserEmail) {
@@ -47,24 +48,32 @@ document.addEventListener("visibilitychange", async () => {
   }
 });
 
-/* ---------------- ৩. অটো চ্যাট রুম ডিটেকশন ও ইনিশিয়ালাইজেশন ---------------- */
+/* ---------------- ৩. অটো চ্যাট রুম ডিটেকশন ও প্রোফাইল সেটআপ ---------------- */
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUserEmail = user.email;
     chatPartnerEmail = (currentUserEmail === ADMIN_EMAIL) ? USER_EMAIL : ADMIN_EMAIL;
     
-    // হেডারে চ্যাট পার্টনারের নাম সেট করা
+    // হেডারে চ্যাট পার্টনারের নাম (ইমেইলের প্রথম অংশ) সেট করা
     const titleEl = document.getElementById('chatWithTitle');
-    if(titleEl) titleEl.innerText = chatPartnerEmail.split('@')[0]; 
+    if(titleEl) {
+      if (chatPartnerEmail === ADMIN_EMAIL) {
+        titleEl.innerText = "Mohammad Sanwar";
+      } else {
+        titleEl.innerText = "sanwar Gp";
+      }
+    }
 
     // প্রোফাইল আইকনে নামের প্রথম অক্ষর দেওয়া
-    const avatarEl = document.querySelector('.avatar-gemini');
+    const avatarEl = document.querySelector('.avatar-wa');
     if(avatarEl) avatarEl.innerText = chatPartnerEmail.charAt(0).toUpperCase();
 
+    // ইউনিক চ্যাট রুম আইডি তৈরি
     chatRoomId = currentUserEmail < chatPartnerEmail 
       ? `${currentUserEmail.replace(/[.@]/g, '_')}_${chatPartnerEmail.replace(/[.@]/g, '_')}`
       : `${chatPartnerEmail.replace(/[.@]/g, '_')}_${currentUserEmail.replace(/[.@]/g, '_')}`;
 
+    // ইউজারকে অনলাইন সেট করা
     await setDoc(doc(db, "users", user.email), {
       online: true,
       typing: false,
@@ -96,41 +105,35 @@ function listenPartnerStatus() {
       const data = snap.data();
       
       if (data.typing) {
-        if (statusEl) { statusEl.innerText = "typing..."; statusEl.className = "status-online"; }
-        if (typingIndicatorEl) { typingIndicatorEl.innerText = "Partner is typing..."; }
+        if (statusEl) { statusEl.innerText = "typing..."; statusEl.className = "status-wa status-online-wa"; }
+        if (typingIndicatorEl) { typingIndicatorEl.innerText = "typing..."; }
       } else if (data.online) {
-        if (statusEl) { statusEl.innerText = "Online"; statusEl.className = "status-online"; }
+        if (statusEl) { statusEl.innerText = "online"; statusEl.className = "status-wa status-online-wa"; }
         if (typingIndicatorEl) { typingIndicatorEl.innerText = ""; }
       } else {
-        if (statusEl) { statusEl.innerText = "Offline"; statusEl.className = "status-text"; }
+        if (statusEl) { statusEl.innerText = "offline"; statusEl.className = "status-wa"; }
         if (typingIndicatorEl) { typingIndicatorEl.innerText = ""; }
       }
     }
   });
 }
 
-/* ---------------- ۵. মেসেজ লোড ও রিয়্যাল-টাইম সিন সিস্টেম ---------------- */
+/* ---------------- ৫. মেসেজ লোড ও রিয়্যাল-টাইম 'Seen' সিস্টেম ---------------- */
 function loadPrivateChatMessages() {
   if (!chatRoomId) return;
   const q = query(collection(db, 'rooms', chatRoomId, 'messages'), orderBy('time'));
   
   onSnapshot(q, (snap) => {
-    const welcomeBox = document.getElementById('welcomeBox');
     const box = document.getElementById('actualMessages');
     if (!box) return;
     
-    if(snap.size > 0) {
-      if(welcomeBox) welcomeBox.style.display = "none";
-    } else {
-      if(welcomeBox) welcomeBox.style.display = "block";
-    }
-
     box.innerHTML = "";
 
     snap.forEach((d) => {
       const data = d.data();
       const msgId = d.id;
 
+      // মেসেজ ওপেন করলেই ওপার প্রান্তের ইউজারের মেসেজ 'Seen' হয়ে যাবে
       if (data.sender !== currentUserEmail && !data.seen) {
         updateDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId), { seen: true });
       }
@@ -139,46 +142,54 @@ function loadPrivateChatMessages() {
       const isMe = data.sender === currentUserEmail;
       div.className = isMe ? "message me" : "message other";
 
+      // রিপ্লাই এবং রিয়্যাকশন লেআউট
       let replyHTML = data.reply ? `<div class="inside-reply">↪ ${data.reply}</div>` : "";
       let reactionHTML = data.reaction ? `<div class="badge-reaction" onclick="removeReaction('${msgId}')">${data.reaction}</div>` : "";
       
+      // টেক্সট মেসেজের ভেতর কোনো লিংক থাকলে তা ক্লিকেবল করা
       let contentHTML = "";
-      if(data.audio) {
-        contentHTML = `<audio controls src="${data.audio}" style="max-width:100%;"></audio>`;
-      } else {
-        let formattedText = data.text || "";
-        const urlRegex = /(https?:\/\/[^\s]+)/g;
-        formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #0b57d0; text-decoration: underline;">${url}</a>`);
-        contentHTML = `<div class="msg-content">${formattedText}</div>`;
+      let formattedText = data.text || "";
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      formattedText = formattedText.replace(urlRegex, (url) => `<a href="${url}" target="_blank" style="color: #53bdeb; text-decoration: underline;">${url}</a>`);
+      contentHTML = `<div class="msg-content">${formattedText}</div>`;
+
+      // হোয়াটসঅ্যাপ স্টাইল ডাবল টিক (✓✓) স্ট্যাটাস
+      let tickStatus = data.seen ? `<span class="seen-blue">✓✓</span>` : `<span style="color:#8696a0;">✓✓</span>`;
+      if (!isMe) tickStatus = ""; // ওপার থেকে আসা মেসেজে নিজের টিক দেখানোর প্রয়োজন নেই
+
+      // মেসেজের পাশে সময় দেখানোর ফরম্যাট (HH:MM)
+      let timeString = "";
+      if(data.time) {
+        const date = data.time.toDate();
+        timeString = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
       }
 
-      let tickStatus = data.seen ? `<span class="seen-blue">✓✓ Seen</span>` : "✓ Delivered";
       let isAdmin = currentUserEmail === ADMIN_EMAIL;
       
       let actionControlHTML = `
         <div class="action-links">
-          <span onclick="triggerReply('${data.text ? data.text.replace(/'/g, "\\'") : 'ভয়েস মেসেজ'}')">Reply</span> | 
+          <span onclick="triggerReply('${data.text ? data.text.replace(/'/g, "\\'") : 'মেসেজ'}')">Reply</span> | 
           <span onclick="triggerReactionBox('${msgId}')">React</span>
           ${(isMe || isAdmin) ? ` | <span class="del-admin" onclick="deleteTargetMsg('${msgId}')">Delete</span>` : ""}
         </div>
       `;
 
       div.innerHTML = `
-        <div class="user-tag">${data.sender}</div>
         ${replyHTML}
         ${contentHTML}
         ${actionControlHTML}
         ${reactionHTML}
-        <div class="meta-data">${tickStatus}</div>
+        <div class="meta-data">${timeString} ${tickStatus}</div>
       `;
 
       box.appendChild(div);
     });
     
+    // নতুন মেসেজ আসলে স্ক্রিন অটো স্ক্রোল হয়ে নিচে চলে যাবে
     setTimeout(() => {
       const mainArea = document.getElementById('messages');
       if(mainArea) mainArea.scrollTop = mainArea.scrollHeight;
-    }, 100);
+    }, 50);
   });
 }
 
@@ -200,14 +211,15 @@ window.sendMessage = async function() {
 
     input.value = "";
     replyText = "";
-    document.getElementById('typing').innerText = "";
+    const typingIndicatorEl = document.getElementById('typing');
+    if(typingIndicatorEl) typingIndicatorEl.innerText = "";
     await updateDoc(doc(db, "users", currentUserEmail), { typing: false });
   } catch (error) {
     alert("মেসেজ পাঠানো যায়নি: " + error.message);
   }
 }
 
-/* ---------------- ७. Typing Indicator ট্রিগার লজিক ---------------- */
+/* ---------------- ৭. Typing Indicator ফায়ারবেস ট্রিগার ---------------- */
 let typingDelayTimer;
 window.emitTyping = function() {
   if (!currentUserEmail) return;
@@ -215,13 +227,14 @@ window.emitTyping = function() {
   clearTimeout(typingDelayTimer);
   typingDelayTimer = setTimeout(() => {
     updateDoc(doc(db, "users", currentUserEmail), { typing: false });
-  }, 2000); 
+  }, 1500); 
 }
 
 /* ---------------- ৮. Reply এবং Emoji Reaction সিস্টেম ---------------- */
 window.triggerReply = function(text) {
   replyText = text;
-  document.getElementById('typing').innerText = "Replying to: " + text;
+  const typingIndicatorEl = document.getElementById('typing');
+  if(typingIndicatorEl) typingIndicatorEl.innerText = "Replying to: " + text;
 }
 
 window.triggerReactionBox = function(msgId) {
@@ -262,7 +275,9 @@ window.clearAllMessages = async function() {
   
   if (confirm("আপনি কি এই চ্যাটের সমস্ত মেসেজ স্থায়ীভাবে মুছে ফেলতে চান?")) {
     try {
-      document.getElementById('typing').innerText = "চ্যাট ক্লিয়ার হচ্ছে...";
+      const typingIndicatorEl = document.getElementById('typing');
+      if(typingIndicatorEl) typingIndicatorEl.innerText = "ক্লিয়ার হচ্ছে...";
+      
       const messagesRef = collection(db, 'rooms', chatRoomId, 'messages');
       const querySnapshot = await getDocs(messagesRef);
       
@@ -272,57 +287,32 @@ window.clearAllMessages = async function() {
       });
       
       await Promise.all(deletePromises);
-      document.getElementById('typing').innerText = "";
+      if(typingIndicatorEl) typingIndicatorEl.innerText = "";
     } catch (error) {
-      document.getElementById('typing').innerText = "";
+      const typingIndicatorEl = document.getElementById('typing');
+      if(typingIndicatorEl) typingIndicatorEl.innerText = "";
       alert("চ্যাট ক্লিয়ার করতে সমস্যা হয়েছে: " + error.message);
     }
   }
 }
 
-/* ---------------- ১১. ভয়েস মেসেজ রেকর্ডিং ---------------- */
-let mediaRecorder;
-let voiceChunks = [];
-window.startRecording = async function() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.start();
-    
-    document.getElementById('typing').innerText = "🎙️ ভয়েস রেকর্ড হচ্ছে (৫ সেকেন্ড)...";
-    mediaRecorder.ondataavailable = e => voiceChunks.push(e.data);
-
-    mediaRecorder.onstop = async () => {
-      document.getElementById('typing').innerText = "ভয়েস ফাইল পাঠানো হচ্ছে...";
-      const blob = new Blob(voiceChunks, { type: 'audio/mp3' });
-      const storageRef = ref(storage, 'voice/' + Date.now());
-      await uploadBytes(storageRef, blob);
-      const url = await getDownloadURL(storageRef);
-
-      await addDoc(collection(db, 'rooms', chatRoomId, 'messages'), {
-        audio: url,
-        sender: currentUserEmail,
-        seen: false,
-        time: serverTimestamp()
-      });
-
-      voiceChunks = [];
-      document.getElementById('typing').innerText = "";
-    };
-
-    setTimeout(() => { if (mediaRecorder.state === "recording") mediaRecorder.stop(); }, 5000);
-  } catch (err) {
-    alert("মাইক্রোফোন অ্যাক্সেস করতে সমস্যা হয়েছে: " + err.message);
-  }
-}
-
-/* ---------------- ১২. MOBILE KEYBOARD FIX ---------------- */
+/* ---------------- ১১. MOBILE KEYBOARD & SCROLL FIX ---------------- */
 const inputField = document.getElementById('messageInput');
 if(inputField) {
+  // কিবোর্ড ওপেন হওয়ার সাথে সাথে চ্যাট স্ক্রিনকে ডাইনামিক্যালি নিচে পুশ করবে
   inputField.addEventListener('focus', () => {
     setTimeout(() => {
       const mainArea = document.getElementById('messages');
-      if(mainArea) mainArea.scrollTop = mainArea.scrollHeight;
-    }, 200);
+      if(mainArea) {
+        mainArea.scrollTop = mainArea.scrollHeight;
+      }
+    }, 80); // কিবোর্ড ওঠার অ্যানিমেশন টাইমিং ফিক্স
+  });
+
+  // Enter চাপলে যেন সরাসরি মেসেজ সেন্ড হয় তার লজিক
+  inputField.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') {
+      sendMessage();
+    }
   });
 }
