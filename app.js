@@ -48,7 +48,11 @@ window.loginWithKey = async function() {
 window.logout = async function() {
   if (currentUserEmail) {
     try {
-      await updateDoc(doc(db, "users", currentUserEmail), { online: false, typing: false });
+      await updateDoc(doc(db, "users", currentUserEmail), { 
+        online: false, 
+        typing: false,
+        lastActive: serverTimestamp() 
+      });
     } catch(e) { console.log(e); }
   }
   await signOut(auth);
@@ -86,31 +90,50 @@ onAuthStateChanged(auth, async (user) => {
 /* 🚨 ৩. ব্রাউজার মিনিমাইজ, নতুন ট্যাব ওপেন বা ব্যাকগ্রাউন্ডে গেলে অটো-লগআউট লজিক */
 function handleAutoLogout() {
   if (currentUserEmail && window.location.pathname.includes('chat.html')) {
-    // ফায়ারবেসে অফলাইন স্ট্যাটাস পাঠিয়ে সাথে সাথে লগআউট করা
     logout();
   }
 }
 
-// ইউজার যখন ব্রাউজার মিনিমাইজ করবে বা অন্য ট্যাবে যাবে
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
     handleAutoLogout();
   }
 });
 
-// ইউজার যখন ব্রাউজারের ট্যাবটি পুরোপুরি কেটে দেবে বা রিফ্রেশ করবে
 window.addEventListener('pagehide', () => {
   handleAutoLogout();
 });
 
 
-/* ৪. চ্যাট মেসেজ ও অন্যান্য লজিক (অপরিবর্তিত) */
+/* ৪. চ্যাট মেসেজ ও পার্টনার স্ট্যাটাস লজিক */
+
+function timeAgo(timestamp) {
+  if (!timestamp) return "offline";
+  const now = new Date();
+  const past = timestamp.toDate();
+  const seconds = Math.floor((now - past) / 1000);
+  
+  if (seconds < 60) return "Active just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `Last active: ${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `Last active: ${hours}h ago`;
+  
+  return `Last active: ${past.toLocaleDateString([], {day: 'numeric', month: 'short'})} at ${past.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+}
+
 function listenPartnerStatus() {
   onSnapshot(doc(db, "users", chatPartnerEmail), (snap) => {
     const statusEl = document.getElementById('status');
     if (snap.exists() && statusEl) {
       const data = snap.data();
-      statusEl.innerText = data.typing ? "typing..." : (data.online ? "online" : "offline");
+      if (data.typing) {
+        statusEl.innerText = "typing...";
+      } else if (data.online) {
+        statusEl.innerText = "online";
+      } else {
+        statusEl.innerText = timeAgo(data.lastActive);
+      }
     }
   });
 }
@@ -141,7 +164,24 @@ function loadPrivateChatMessages() {
       let tickStatus = data.seen ? `<span class="seen-blue">✓✓</span>` : `<span>✓✓</span>`;
       if (!isMe) tickStatus = "";
 
-      let timeString = data.time ? data.time.toDate().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+      let dateTimeString = "";
+      if (data.time) {
+        const msgDate = data.time.toDate();
+        const timeOptions = { hour: '2-digit', minute: '2-digit' };
+        const dateOptions = { day: 'numeric', month: 'short' };
+        
+        const isToday = new Date().toDateString() === msgDate.toDateString();
+        if (isToday) {
+          dateTimeString = msgDate.toLocaleTimeString([], timeOptions);
+        } else {
+          dateTimeString = `${msgDate.toLocaleDateString([], dateOptions)}, ${msgDate.toLocaleTimeString([], timeOptions)}`;
+        }
+      }
+
+      // 🔒 এখানে ডিলিট অপশনটি শুধুমাত্র PERSON_ONE_EMAIL এর জন্য লক করা হয়েছে
+      const deleteOptionHTML = (currentUserEmail === PERSON_ONE_EMAIL) 
+        ? ` | <span style="color:#ef5350" onclick="deleteTargetMsg('${msgId}')">Delete</span>` 
+        : "";
 
       div.innerHTML = `
         ${replyHTML}
@@ -149,10 +189,10 @@ function loadPrivateChatMessages() {
         <div class="action-links">
           <span onclick="triggerReply('${data.text}')">Reply</span> | 
           <span onclick="triggerReactionBox('${msgId}')">React</span>
-          ${(isMe || currentUserEmail === PERSON_ONE_EMAIL) ? ` | <span style="color:#ef5350" onclick="deleteTargetMsg('${msgId}')">Delete</span>` : ""}
+          ${deleteOptionHTML}
         </div>
         ${reactionHTML}
-        <div class="meta-data">${timeString} ${tickStatus}</div>
+        <div class="meta-data">${dateTimeString} ${tickStatus}</div>
       `;
       box.appendChild(div);
     });
@@ -198,5 +238,24 @@ window.triggerReply = function(text) { replyText = text; document.getElementById
 window.triggerReactionBox = function(msgId) { currentSelectedMsgId = msgId; document.getElementById('emojiMenu').style.display = 'flex'; }
 window.appendEmoji = async function(emoji) { if (currentSelectedMsgId) { await updateDoc(doc(db, 'rooms', chatRoomId, 'messages', currentSelectedMsgId), { reaction: emoji }); } document.getElementById('emojiMenu').style.display = 'none'; }
 window.toggleEmojiMenu = function() { const menu = document.getElementById('emojiMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
-window.deleteTargetMsg = async function(msgId) { if (confirm("ডিলিট করতে চান?")) await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId)); }
-window.clearAllMessages = async function() { if (confirm("সব মেসেজ মুছে ফেলবেন?")) { const snap = await getDocs(collection(db, 'rooms', chatRoomId, 'messages')); snap.forEach((m) => deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', m.id))); } }
+
+// 🔒 সিঙ্গেল মেসেজ ডিলিট করার ব্যাকএন্ড সিকিউরিটি চেক
+window.deleteTargetMsg = async function(msgId) {
+  if (currentUserEmail !== PERSON_ONE_EMAIL) {
+    return alert("দুঃখিত, মেসেজ ডিলিট করার অনুমতি আপনার নেই!");
+  }
+  if (confirm("ডিলিট করতে চান?")) {
+    await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
+  }
+}
+
+// 🔒 চ্যাট হিস্ট্রি সম্পূর্ণ ক্লিয়ার করার ব্যাকএন্ড সিকিউরিটি চেক
+window.clearAllMessages = async function() {
+  if (currentUserEmail !== PERSON_ONE_EMAIL) {
+    return alert("দুঃখিত, সম্পূর্ণ চ্যাট ক্লিয়ার করার অনুমতি আপনার নেই!");
+  }
+  if (confirm("সব মেসেজ মুছে ফেলবেন?")) {
+    const snap = await getDocs(collection(db, 'rooms', chatRoomId, 'messages'));
+    snap.forEach((m) => deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', m.id)));
+  }
+}
