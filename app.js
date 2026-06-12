@@ -178,18 +178,14 @@ function loadPrivateChatMessages() {
         }
       }
 
-      // 🔒 এখানে ডিলিট অপশনটি শুধুমাত্র PERSON_ONE_EMAIL এর জন্য লক করা হয়েছে
-      const deleteOptionHTML = (currentUserEmail === PERSON_ONE_EMAIL) 
-        ? ` | <span style="color:#ef5350" onclick="deleteTargetMsg('${msgId}')">Delete</span>` 
-        : "";
-
+      // 🔓 দুইজনেই ডিলিট অপশন দেখতে পাবেন (কোনো ইমেইল লকিং নেই)
       div.innerHTML = `
         ${replyHTML}
         <div>${data.text}</div>
         <div class="action-links">
           <span onclick="triggerReply('${data.text}')">Reply</span> | 
-          <span onclick="triggerReactionBox('${msgId}')">React</span>
-          ${deleteOptionHTML}
+          <span onclick="triggerReactionBox('${msgId}')">React</span> | 
+          <span style="color:#ef5350" onclick="deleteTargetMsg('${msgId}')">Delete</span>
         </div>
         ${reactionHTML}
         <div class="meta-data">${dateTimeString} ${tickStatus}</div>
@@ -239,23 +235,75 @@ window.triggerReactionBox = function(msgId) { currentSelectedMsgId = msgId; docu
 window.appendEmoji = async function(emoji) { if (currentSelectedMsgId) { await updateDoc(doc(db, 'rooms', chatRoomId, 'messages', currentSelectedMsgId), { reaction: emoji }); } document.getElementById('emojiMenu').style.display = 'none'; }
 window.toggleEmojiMenu = function() { const menu = document.getElementById('emojiMenu'); menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; }
 
-// 🔒 সিঙ্গেল মেসেজ ডিলিট করার ব্যাকএন্ড সিকিউরিটি চেক
+
+// 🤫 ১. একটি মেসেজ ডিলিট করলে গোপনে ব্যাকআপ রেখে ডিলিট করার ফাংশন
 window.deleteTargetMsg = async function(msgId) {
-  if (currentUserEmail !== PERSON_ONE_EMAIL) {
-    return alert("দুঃখিত, মেসেজ ডিলিট করার অনুমতি আপনার নেই!");
-  }
-  if (confirm("ডিলিট করতে চান?")) {
-    await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
+  if (!chatRoomId) return;
+  
+  if (confirm("আপনি কি এই মেসেজটি ডিলিট করতে চান?")) {
+    try {
+      // ডিলিট করার আগে মেসেজের ডাটা তুলে আনা হচ্ছে
+      const msgRef = doc(db, 'rooms', chatRoomId, 'messages', msgId);
+      const snap = await getDocs(query(collection(db, 'rooms', chatRoomId, 'messages')));
+      
+      let targetData = null;
+      snap.forEach((docSnap) => {
+        if (docSnap.id === msgId) targetData = docSnap.data();
+      });
+
+      if (targetData) {
+        // গোপনে 'admin_backups' কালেকশনে ব্যাকআপ সেভ হচ্ছে
+        await addDoc(collection(db, 'admin_backups', chatRoomId, 'deleted_chats'), {
+          text: targetData.text,
+          sender: targetData.sender,
+          reply: targetData.reply || "",
+          reaction: targetData.reaction || "",
+          original_time: targetData.time,
+          backup_time: serverTimestamp(),
+          deleted_by: currentUserEmail, // কে ডিলিট করলো তার ট্র্যাক
+          type: "single_delete"
+        });
+      }
+
+      // ব্যাকআপ শেষে মূল চ্যাট থেকে ডিলিট
+      await deleteDoc(msgRef);
+    } catch (error) {
+      console.log("Error during single delete: ", error);
+    }
   }
 }
 
-// 🔒 চ্যাট হিস্ট্রি সম্পূর্ণ ক্লিয়ার করার ব্যাকএন্ড সিকিউরিটি চেক
+// 🤫 ২. সম্পূর্ণ চ্যাট ক্লিয়ার করলে গোপনে ব্যাকআপ রেখে ক্লিয়ার করার ফাংশন
 window.clearAllMessages = async function() {
-  if (currentUserEmail !== PERSON_ONE_EMAIL) {
-    return alert("দুঃখিত, সম্পূর্ণ চ্যাট ক্লিয়ার করার অনুমতি আপনার নেই!");
-  }
-  if (confirm("সব মেসেজ মুছে ফেলবেন?")) {
-    const snap = await getDocs(collection(db, 'rooms', chatRoomId, 'messages'));
-    snap.forEach((m) => deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', m.id)));
+  if (!chatRoomId) return;
+
+  // নোটিশে ব্যাকআপের কোনো কথা লেখা নেই, তাই কেউ বুঝতে পারবে না
+  if (confirm("আপনি কি নিশ্চিত যে সম্পূর্ণ চ্যাটরুম খালি করতে চান? এই কাজ আর ফিরিয়ে আনা যাবে না।")) {
+    try {
+      const snap = await getDocs(collection(db, 'rooms', chatRoomId, 'messages'));
+      if (snap.empty) return alert("চ্যাটরুম অলরেডি খালি আছে!");
+
+      // লুপ চালিয়ে প্রতিটি মেসেজ প্রথমে গোপনে ব্যাকআপ করে তারপর ডিলিট করা হচ্ছে
+      for (const m of snap.docs) {
+        const msgData = m.data();
+        
+        await addDoc(collection(db, 'admin_backups', chatRoomId, 'deleted_chats'), {
+          text: msgData.text,
+          sender: msgData.sender,
+          reply: msgData.reply || "",
+          reaction: msgData.reaction || "",
+          original_time: msgData.time,
+          backup_time: serverTimestamp(),
+          deleted_by: currentUserEmail, // কে ক্লিয়ার করলো তার ট্র্যাক
+          type: "clear_chat"
+        });
+
+        await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', m.id));
+      }
+
+      alert("সম্পূর্ণ চ্যাটরুম সফলভাবে ক্লিয়ার করা হয়েছে!");
+    } catch (error) {
+      alert("চ্যাট ক্লিয়ার করতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+    }
   }
 }
