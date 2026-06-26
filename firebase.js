@@ -5,13 +5,15 @@ import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTim
 
 // ⚠️ এখানে আপনার ফায়ারবেস কনসোলের আসল ক্রেডেনশিয়াল বসাবেন
 const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyC_ThrBO6EoEX9WIEzM63oXPA9tHYwpSws",
-  authDomain: "smrity-chat.firebaseapp.com",
+  authDomain: "govjob.vercel.app", // 👈 এখানে আপনার নতুন ডোমেইনের নাম বসান (https:// ছাড়া)
   projectId: "smrity-chat",
   storageBucket: "smrity-chat.firebasestorage.app",
   messagingSenderId: "979577122342",
   appId: "1:979577122342:web:b63b79ad6b9745b94080e7",
   measurementId: "G-KRDKRNS8B4"
+};
 };
 
 const app = initializeApp(firebaseConfig);
