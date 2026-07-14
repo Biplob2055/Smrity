@@ -302,8 +302,27 @@
             displayQuestions('gk', 'gk-short', 'gk-more');
         };
     </script>
-    
     <!-- আপনার আসল লজিক ফাইল কানেকশন -->
     <script type="module" src="./app.js"></script>
+    <script>
+        // বাটনের ক্লিকের সাথে app.js এর মূল লগইন লজিকের সরাসরি সংযোগ
+        window.loginWithKey = function() {
+            const pinInput = document.getElementById('accessPassword');
+            if (window.handleSecretLogin) {
+                // app.js থেকে এক্সপোর্ট করা মূল ফাংশন কল করবে
+                window.handleSecretLogin(pinInput.value); 
+            } else {
+                // যদি app.js পুরোপুরি লোড হতে সময় নেয় বা ব্যাকআপ চেক
+                console.log("সিস্টেম লোড হচ্ছে, অনুগ্রহ করে আবার চেষ্টা করুন।");
+            }
+        };
+        
+        // এন্টার চাপ দিলেও যেন লগইন হয় তার ব্যবস্থা
+        document.getElementById('accessPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                window.loginWithKey();
+            }
+        });
+    </script>
 </body>
 </html>
