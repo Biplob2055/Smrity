@@ -16,7 +16,7 @@
       <div class="avatar-wa">M</div>
       <div class="user-info-wa">
         <h3 id="chatWithTitle">Loading...</h3>
-        <span id="status" class="status-wa">online</span>
+        <span id="status" class="status-wa">offline</span>
       </div>
     </div>
     <div class="header-right-wa">
@@ -35,7 +35,7 @@
   <div class="bottom-input-bar-wa">
     <div class="wa-input-wrapper">
       <button class="wa-icon-btn" onclick="toggleEmojiMenu()">😊</button>
-      <input id="messageInput" placeholder="Message..." oninput="emitTyping()">
+      <input id="messageInput" placeholder="Message..." oninput="emitTyping()" onkeypress="if(event.key === 'Enter') sendMessage()">
       <button class="wa-icon-btn">📎</button>
     </div>
     
