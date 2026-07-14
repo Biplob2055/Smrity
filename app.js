@@ -36,11 +36,27 @@ window.loginWithKey = function() {
     return alert("ভুল পিন! প্রবেশাধিকার নিষিদ্ধ।");
   }
 
-  // ব্রাউজারের ক্যাশ বা লোকাল স্টোরেজে কিচ্ছু সেভ না করে শুধু সেশন মেমোরিতে রাখা
+  // সেশন মেমোরিতে রাখা
   sessionStorage.setItem('secure_session_token', btoa(currentUserPIN));
   sessionStorage.setItem('secure_session_user', currentUserName);
 
   pinInput.value = "";
+  window.location.href = 'chat.html';
+};
+
+// এই ফাংশনটি সরাসরি উইন্ডোতে এক্সপোজ করা হলো যাতে index.html এটি ব্যবহার করতে পারে
+window.handleSecretLogin = function(enteredPIN) {
+  if (enteredPIN === PIN_USER_ONE) {
+    currentUserName = "Mohammad Sanwar";
+    currentUserPIN = PIN_USER_ONE;
+  } else if (enteredPIN === PIN_USER_TWO) {
+    currentUserName = "Mayaboti";
+    currentUserPIN = PIN_USER_TWO;
+  } else {
+    return alert("ভুল পিন! প্রবেশাধিকার নিষিদ্ধ।");
+  }
+  sessionStorage.setItem('secure_session_token', btoa(currentUserPIN));
+  sessionStorage.setItem('secure_session_user', currentUserName);
   window.location.href = 'chat.html';
 };
 
@@ -56,6 +72,7 @@ function checkSessionSecurity() {
       currentUserPIN = atob(token);
       currentUserName = user;
       
+      // চ্যাট হেডার টাইটেল পরিবর্তন (কার সাথে কথা বলছেন তা দেখাবে)
       const titleEl = document.getElementById('chatWithTitle');
       if (titleEl) {
         titleEl.innerText = (currentUserName === "Mohammad Sanwar") ? "Mayaboti" : "Mohammad Sanwar";
@@ -88,7 +105,7 @@ window.logout = function() {
 };
 
 /* ==========================================================================
-   ২. মিলিটারি-গ্রেড অটো-লগআউট (ট্যাব মিনিমাইজ বা বন্ধ করলেই সেশন হাওয়া)
+   ২. মিলিটারি-গ্রেড অটো-লগআউট
    ========================================================================== */
 function handleUltraSecurityLogout() {
   if (window.location.pathname.includes('chat.html')) {
@@ -157,7 +174,7 @@ function listenPartnerStatus() {
 }
 
 /* ==========================================================================
-   ৪. চ্যাট মেসেজিং ও রিয়েলটাইম ডিসপ্লে (কোনো ইমেইল লকিং ছাড়া)
+   ৪. চ্যাট মেসেজিং ও রিয়েলটাইম ডিসপ্লে
    ========================================================================== */
 function loadPrivateChatMessages() {
   if (!chatRoomId) return;
@@ -191,7 +208,6 @@ function loadPrivateChatMessages() {
         dateTimeString = msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
 
-      // দুইজনেই সমানভাবে ডিলিট অপশন দেখতে পাবেন, কোনো নোটিফিকেশন ছাড়া সরাসরি ডিলিট হবে
       div.innerHTML = `
         ${replyHTML}
         <div>${data.text}</div>
@@ -213,8 +229,9 @@ function loadPrivateChatMessages() {
 
 window.sendMessage = async function() {
   const input = document.getElementById('messageInput');
+  if (!input) return;
   const messageText = input.value.trim();
-  if (!messageText || !chatRoomId) return;
+  if (!messageText || !chatRoomId || !currentUserName) return;
 
   try {
     await addDoc(collection(db, 'rooms', chatRoomId, 'messages'), {
@@ -226,10 +243,13 @@ window.sendMessage = async function() {
     });
     input.value = "";
     replyText = "";
-    document.getElementById('typing').innerText = "";
+    
+    const typingIndicator = document.getElementById('typing');
+    if (typingIndicator) typingIndicator.innerText = "";
+    
     await updateDoc(doc(db, "users", currentUserName), { typing: false });
   } catch (error) {
-    console.error(error);
+    console.error("মেসেজ পাঠাতে সমস্যা হয়েছে:", error);
   }
 };
 
@@ -245,7 +265,8 @@ window.emitTyping = function() {
 
 window.triggerReply = function(text) { 
   replyText = text; 
-  document.getElementById('typing').innerText = "Replying to: " + text; 
+  const typingIndicator = document.getElementById('typing');
+  if (typingIndicator) typingIndicator.innerText = "Replying to: " + text; 
 };
 
 window.triggerReactionBox = function(msgId) { 
@@ -266,10 +287,8 @@ window.toggleEmojiMenu = function() {
 };
 
 /* ==========================================================================
-   ৫. সম্পূর্ণ নিরাপদ ডিলিট ও অল ক্লিয়ার (কোনো গোপন ব্যাকআপ থাকবে না)
+   ৫. সম্পূর্ণ নিরাপদ ডিলিট ও অল ক্লিয়ার
    ========================================================================== */
-
-// ১টি মেসেজ সরাসরি চিরতরে ডিলিট করার ফাংশন
 window.deleteTargetMsg = async function(msgId) {
   if (!chatRoomId) return;
   if (confirm("আপনি কি এই মেসেজটি ডিলিট করতে চান?")) {
@@ -281,7 +300,6 @@ window.deleteTargetMsg = async function(msgId) {
   }
 };
 
-// সম্পূর্ণ চ্যাটরুমের মেসেজ সরাসরি খালি (Clear Chat) করার ফাংশن
 window.clearAllMessages = async function() {
   if (!chatRoomId) return;
   if (confirm("আপনি কি নিশ্চিত যে সম্পূর্ণ চ্যাটরুম খালি করতে চান?")) {
@@ -296,7 +314,5 @@ window.clearAllMessages = async function() {
   }
 };
 
-// সেশন সিকিউরিটি ইনিশিয়ালাইজ করা
-document.addEventListener("DOMContentLoaded", () => {
-  checkSessionSecurity();
-});
+// পেজ লোড হওয়ার সাথে সাথে সিকিউরিটি এবং সেশন ডেটা চেক করবে
+checkSessionSecurity();
