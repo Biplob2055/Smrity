@@ -3,22 +3,16 @@ import {
 } from './firebase.js';
 import { getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// 🔒 চ্যাটরুমের একমাত্র গোপন আইডি
 const chatRoomId = "secret_secure_private_room_2026";
 
-// 👥 দুজনের জন্য দুটি সম্পূর্ণ আলাদা গোপন পিন (PIN)
-const PIN_USER_ONE = "01609"; // Mohammad Sanwar
-const PIN_USER_TWO = "861155"; // Mayaboti
+const PIN_USER_ONE = "01609"; 
+const PIN_USER_TWO = "861155"; 
 
-// ব্রাউজারের মেমোরিতে সাময়িক ডাটা রাখার ভেরিয়েবল
 let currentUserPIN = null;
 let currentUserName = null;
 let replyText = "";
 let currentSelectedMsgId = null;
 
-/* ==========================================================================
-   ১. সম্পূর্ণ নিরাপদ পিন লগইন সিস্টেম
-   ========================================================================== */
 window.loginWithKey = function() {
   try {
     const pinInput = document.getElementById('accessPassword');
@@ -66,7 +60,6 @@ window.handleSecretLogin = function(enteredPIN) {
   }
 };
 
-// পেজ লোড হওয়ার সময় অটো-লগইন ও সেশন লোড করার লজিক
 function checkSessionSecurity() {
   try {
     const token = sessionStorage.getItem('secure_session_token');
@@ -81,27 +74,16 @@ function checkSessionSecurity() {
       currentUserPIN = atob(token);
       currentUserName = user;
       
-      // 🎯 ১. প্রথমে সাথে সাথে UI পরিবর্তন করে নাম বসানো (যাতে Loading... চলে যায়)
       const partnerName = (currentUserName === "Mohammad Sanwar") ? "Mayaboti" : "Mohammad Sanwar";
-      // সম্ভাব্য সব আইডিতে ট্রাই করবে যাতে ভুল না হয়
       const titleEl = document.getElementById('chatWithTitle') || document.getElementById('userName') || document.getElementById('partnerName');
       if (titleEl) {
         titleEl.innerText = partnerName;
       }
 
-      // 🎯 ২. ডাটাবেজের কানেকশন আলাদা ব্যাকগ্রাউন্ডে চালানো যাতে ক্র্যাশ না করে
       setTimeout(() => {
-        try {
-          updateLiveStatus(true);
-        } catch (e) { console.error("অনলাইন স্ট্যাটাস আপডেট ব্যর্থ:", e); }
-        
-        try {
-          listenPartnerStatus();
-        } catch (e) { console.error("পার্টনার স্ট্যাটাস লোড ব্যর্থ:", e); }
-        
-        try {
-          loadPrivateChatMessages();
-        } catch (e) { console.error("মেসেজ লোড ব্যর্থ:", e); }
+        try { updateLiveStatus(true); } catch (e) {}
+        try { listenPartnerStatus(); } catch (e) {}
+        try { loadPrivateChatMessages(); } catch (e) {}
       }, 100);
 
     } else {
@@ -118,9 +100,7 @@ function checkSessionSecurity() {
 }
 
 function clearSessionAndRedirect() {
-  try {
-    updateLiveStatus(false);
-  } catch (e) {}
+  try { updateLiveStatus(false); } catch (e) {}
   sessionStorage.clear();
   if (window.location.pathname.includes('chat.html')) {
     window.location.href = 'index.html';
@@ -131,14 +111,9 @@ window.logout = function() {
   clearSessionAndRedirect();
 };
 
-/* ==========================================================================
-   ২. মিলিটারি-গ্রেড অটো-লগআউট
-   ========================================================================== */
 function handleUltraSecurityLogout() {
   if (window.location.pathname.includes('chat.html')) {
-    try {
-      updateLiveStatus(false);
-    } catch(e){}
+    try { updateLiveStatus(false); } catch(e){}
     sessionStorage.clear();
     window.location.href = 'index.html';
   }
@@ -154,10 +129,6 @@ window.addEventListener('pagehide', handleUltraSecurityLogout);
 window.addEventListener('beforeunload', handleUltraSecurityLogout);
 window.addEventListener('unload', handleUltraSecurityLogout);
 
-
-/* ==========================================================================
-   ৩. স্ট্যাটাস এবং চ্যাটরুম লজিক
-   ========================================================================== */
 async function updateLiveStatus(isOnline) {
   if (!currentUserName || !db) return;
   try {
@@ -167,9 +138,7 @@ async function updateLiveStatus(isOnline) {
       typing: false,
       lastActive: serverTimestamp() 
     }, { merge: true });
-  } catch (e) {
-    console.error("স্ট্যাটাস আপডেট এরর:", e);
-  }
+  } catch (e) {}
 }
 
 function timeAgo(timestamp) {
@@ -208,14 +177,9 @@ function listenPartnerStatus() {
         }
       }
     });
-  } catch (e) {
-    console.error("স্ট্যাটাস লিসেন এরর:", e);
-  }
+  } catch (e) {}
 }
 
-/* ==========================================================================
-   ৪. চ্যাট মেসেজিং ও রিয়েলটাইম ডিসপ্লে
-   ========================================================================== */
 function loadPrivateChatMessages() {
   if (!chatRoomId || !db) return;
   try {
@@ -253,13 +217,16 @@ function loadPrivateChatMessages() {
           } catch(e){}
         }
 
+        // সুরক্ষিত স্ট্রিং এস্কেপিং
+        const safeText = (data.text || "").replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/"/g, '\\"');
+
         div.innerHTML = `
           ${replyHTML}
-          <div>${data.text}</div>
+          <div>${data.text || ""}</div>
           <div class="action-links">
-            <span onclick="triggerReply('${data.text.replace(/'/g, "\\'")}')">Reply</span> | 
-            <span onclick="triggerReactionBox('${msgId}')">React</span> | 
-            <span style="color:#ef5350; cursor:pointer;" onclick="deleteTargetMsg('${msgId}')">Delete</span>
+            <span style="cursor:pointer;" onclick="window.triggerReply('${safeText}')">Reply</span> | 
+            <span style="cursor:pointer;" onclick="window.triggerReactionBox('${msgId}')">React</span> | 
+            <span style="color:#ef5350; cursor:pointer;" onclick="window.deleteTargetMsg('${msgId}')">Delete</span>
           </div>
           ${reactionHTML}
           <div class="meta-data">${dateTimeString} ${tickStatus}</div>
@@ -298,8 +265,7 @@ window.sendMessage = async function() {
     
     await updateDoc(doc(db, "users", currentUserName), { typing: false });
   } catch (error) {
-    console.error("মেসেজ পাঠাতে সমস্যা হয়েছে:", error);
-    alert("মেসেজ পাঠানো যায়নি। দয়া করে ইন্টারনেট কানেকশন বা কনসোল চেক করুন।");
+    console.error("মেসেজ পাঠাতে সমস্যা:", error);
   }
 };
 
@@ -342,17 +308,12 @@ window.toggleEmojiMenu = function() {
   if(menu) menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex'; 
 };
 
-/* ==========================================================================
-   ৫. সম্পূর্ণ নিরাপদ ডিলিট ও অল ক্লিয়ার
-   ========================================================================== */
 window.deleteTargetMsg = async function(msgId) {
   if (!chatRoomId || !db) return;
   if (confirm("আপনি কি এই মেসেজটি ডিলিট করতে চান?")) {
     try {
       await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', msgId));
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   }
 };
 
@@ -364,11 +325,8 @@ window.clearAllMessages = async function() {
       for (const m of snap.docs) {
         await deleteDoc(doc(db, 'rooms', chatRoomId, 'messages', m.id));
       }
-    } catch (error) {
-      console.error(error);
-    }
+    } catch (error) {}
   }
 };
 
-// ফাইল লোড হওয়ামাত্র সিকিউরিটি সেশন চেক চালু হবে
 checkSessionSecurity();
