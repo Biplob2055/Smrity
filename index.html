@@ -20,8 +20,8 @@
         .column-title { color: #1a237e; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; text-align: center; }
         
         /* 📝 প্রশ্ন ও উত্তর স্টাইল */
-        .q-box { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0; }
-        .question { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
+        .q-box { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0; text-align: left; }
+        .question { font-weight: 600; color: #2c3e50; margin-bottom: 4px; line-height: 1.5; }
         .answer { color: #27ae60; font-weight: 500; font-size: 15px; }
         
         /* 📑 রিড মোর বাটন ও অতিরিক্ত অংশ */
@@ -29,7 +29,7 @@
         .read-more-btn:hover { background-color: #3f51b5; color: white; }
         .more-questions { display: none; margin-top: 15px; }
 
-        /* 🔒 গোপন লগইন মডাল/পপআপ (সম্পূর্ণ হাইড থাকে) */
+        /* 🔒 গোপন লগইন মডাল/পপআপ */
         .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000; }
         .login-box { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 360px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; text-align: center; }
         .login-box h3 { margin-bottom: 20px; color: #1a237e; }
@@ -46,31 +46,26 @@
 
     <!-- 🔝 টপ বার -->
     <header>
-        <h1>চাকরির প্রস্তুতি পোর্টাল</h1>
-        <!-- এই বাটনে ক্লিক করলেই কেবল সিক্রেট লগইন বক্স আসবে -->
+        <h1>প্রাথমিক ও শিক্ষক নিবন্ধন প্রস্তুতি পোর্টাল</h1>
         <button class="login-trigger" onclick="openLoginModal()">লগইন</button>
     </header>
 
     <!-- 📐 ৩ কলামের প্রশ্নের মেইন কন্টেইনার -->
     <div class="container">
         
-        <!-- 🏴 কলাম ১: ইংলিশ -->
+        <!-- 🏴 কলাম ১: ইংরেজী -->
         <div class="column">
             <div class="column-title">⚙️ ইংরেজী (English)</div>
-            <div id="english-short">
-                <!-- এখানে ১০টি প্রশ্ন স্ক্রিপ্ট দিয়ে লোড হবে -->
-            </div>
-            <button class="read-more-btn" onclick="toggleReadMore('english')">Read More (আরও ৪০টি প্রশ্ন)</button>
-            <div id="english-more" class="more-questions">
-                <!-- রিড মোরে ক্লিক করলে বাকি ৪০টি এখানে দেখাবে -->
-            </div>
+            <div id="english-short"></div>
+            <button class="read-more-btn" onclick="toggleReadMore('english')">Read More (আরও প্রশ্ন দেখুন)</button>
+            <div id="english-more" class="more-questions"></div>
         </div>
 
         <!-- 🏴 কলাম ২: গণিত -->
         <div class="column">
             <div class="column-title">🔢 গণিত (Mathematics)</div>
             <div id="math-short"></div>
-            <button class="read-more-btn" onclick="toggleReadMore('math')">Read More (আরও ৪০টি প্রশ্ন)</button>
+            <button class="read-more-btn" onclick="toggleReadMore('math')">Read More (আরও প্রশ্ন দেখুন)</button>
             <div id="math-more" class="more-questions"></div>
         </div>
 
@@ -78,77 +73,236 @@
         <div class="column">
             <div class="column-title">🌍 সাধারণ জ্ঞান (General Knowledge)</div>
             <div id="gk-short"></div>
-            <button class="read-more-btn" onclick="toggleReadMore('gk')">Read More (আরও ৪০টি প্রশ্ন)</button>
+            <button class="read-more-btn" onclick="toggleReadMore('gk')">Read More (আরও প্রশ্ন দেখুন)</button>
             <div id="gk-more" class="more-questions"></div>
         </div>
 
     </div>
 
-    <!-- 🔒 সিক্রেট লগইন পপআপ উইন্ডো (গুগল পাসওয়ার্ড সেভ প্রুফ) -->
+    <!-- 🔒 সিক্রেট লগইন পপআপ উইন্ডো -->
     <div id="loginModal" class="login-modal">
         <div class="login-box">
             <span class="close-btn" onclick="closeLoginModal()">&times;</span>
             <h3>সুরক্ষিত প্রবেশদ্বার</h3>
-            <!-- ব্রাউজার সিকিউরিটির জন্য autocomplete="off" লক করা -->
             <input type="password" id="accessPassword" placeholder="গোপন পিন দিন" autocomplete="off">
             <button onclick="window.loginWithKey()">প্রবেশ করুন</button>
         </div>
     </div>
 
-    <!-- 📋 প্রশ্ন-উত্তর ডাটা এবং সিক্রেট পপআপ কন্ট্রোল স্ক্রিপ্ট -->
+    <!-- 📋 প্রশ্ন-উত্তর ডাটা এবং কন্ট্রোল স্ক্রিপ্ট -->
     <script>
-        // গোপন পপআপ ফাংশনসমূহ
         function openLoginModal() {
             document.getElementById('loginModal').style.display = 'flex';
-            document.getElementById('accessPassword').value = ""; // পিন মুছে রাখা
+            document.getElementById('accessPassword').value = "";
             document.getElementById('accessPassword').focus();
         }
         function closeLoginModal() {
             document.getElementById('loginModal').style.display = 'none';
         }
         
-        // রিড মোর টগল ফাংশন
         function toggleReadMore(type) {
             const moreBox = document.getElementById(type + '-more');
             const btn = event.target;
             if (moreBox.style.display === 'block') {
                 moreBox.style.display = 'none';
-                btn.innerText = "Read More (আরও ৪০টি প্রশ্ন)";
+                btn.innerText = "Read More (আরও প্রশ্ন দেখুন)";
             } else {
                 moreBox.style.display = 'block';
                 btn.innerText = "কমিয়ে দেখান";
             }
         }
 
-        // লুপ চালিয়ে ডামি ৫০টি করে প্রশ্ন জেনারেট করার অটোমেটিক মেকানিজম (যাতে পেজটি আসল দেখায়)
-        function generateQuestions(subject, shortId, moreId, textFormat) {
+        // প্রকৃত প্রশ্ন ও উত্তরের ডাটাবেজ
+        const questionData = {
+            english: [
+                { q: "Choose the correct sentence.", a: "Each of the boys gets a prize." },
+                { q: "What is the antonym of the word 'Flexible'?", a: "Rigid" },
+                { q: "Identify the correct spelling.", a: "Lieutenant" },
+                { q: "Fill in the blank: He is devoid ___ common sense.", a: "of" },
+                { q: "What is the noun form of the word 'Beautiful'?", a: "Beauty" },
+                { q: "A person whose husband has died is called a ___.", a: "Widow" },
+                { q: "What is the synonym of 'Competent'?", a: "Capable" },
+                { q: "Call it a day' means-", a: "To stop working on something" },
+                { q: "Change the voice: 'Shut the door'.", a: "Let the door be shut." },
+                { q: "What is the plural form of 'Ox'?", a: "Oxen" },
+                // Read more অংশ (বাকি ৪০টি বাস্তব প্রশ্ন)
+                { q: "Identify the part of speech of the word 'fast' in: 'He runs fast.'", a: "Adverb" },
+                { q: "What is the past participle of 'Choose'?", a: "Chosen" },
+                { q: "The word 'Subjudice' means-", a: "Under judicial consideration" },
+                { q: "A speech full of too many words is-", a: "A verbose speech" },
+                { q: "Find the correct passive structure: 'Who is calling me?'", a: "By whom am I being called?" },
+                { q: "What is the meaning of 'Black Sheep'?", a: "Bad character person" },
+                { q: "Which one is a feminine gender?", a: "Mare" },
+                { q: "The idiom 'At daggers drawn' means-", a: "On the verge of fighting" },
+                { q: "What is the synonym of 'Cordial'?", a: "Friendly" },
+                { q: "Choose the correct preposition: He died ___ over eating.", a: "from" },
+                { q: "The singular form of 'Criteria' is-", a: "Criterion" },
+                { q: "What is the meaning of 'Out and out'?", a: "Thoroughly" },
+                { q: "What is the superlative degree of 'Bad'?", a: "Worst" },
+                { q: "One who writes plays is called a ___.", a: "Playwright" },
+                { q: "Which spelling is correct?", a: "Committee" },
+                { q: "A sub-editor is a person who-", a: "Edits articles before publication" },
+                { q: "What is the antonym of 'Optimism'?", a: "Pessimism" },
+                { q: "Fill in the blank: I have no pen to write ___.", a: "with" },
+                { q: "The phrase 'Maiden speech' means-", a: "First speech" },
+                { q: "The word 'Omnipotent' means-", a: "All-powerful" },
+                { q: "What type of noun is 'Team'?", a: "Collective Noun" },
+                { q: "The phrase 'In a nutshell' means-", a: "Briefly" },
+                { q: "What is the antonym of 'Gentle'?", a: "Rude" },
+                { q: "Which one is a plural noun?", a: "Data" },
+                { q: "What is the synonym of 'Fragile'?", a: "Breakable" },
+                { q: "A drawing on transparent paper is a-", a: "Tracing" },
+                { q: "Fill in the blank: The sun ___ when I woke up.", a: "was shining" },
+                { q: "What is the abstract form of 'Man'?", a: "Manhood" },
+                { q: "The phrase 'By fits and starts' means-", a: "Irregularly" },
+                { q: "What is the spelling of the word meaning 'বিলাসবহুল'?", a: "Luxurious" },
+                { q: "A paragraph must have ___ main idea.", a: "one" },
+                { q: "What is the synonym of 'Delight'?", a: "Joy" },
+                { q: "What is the past form of 'Fly'?", a: "Flew" },
+                { q: "Choose the prefix for 'Fortunate' to make it negative.", a: "Un" },
+                { q: "The expression 'Take after' means-", a: "Resemble" },
+                { q: "Which one is in singular number?", a: "Phenomenon" },
+                { q: "What is the synonym of 'Abandon'?", a: "Give up" },
+                { q: "Identify the correct structure: 'Had I been a king,...'", a: "I would have helped the poor." },
+                { q: "The word 'Anatomy' relates to-", a: "Structure of human body" },
+                { q: "What is the plural of 'Medium'?", a: "Media" }
+            ],
+            math: [
+                { q: "১ থেকে ১০০ পর্যন্ত সংখ্যার যোগফল কত?", a: "৫০৫০" },
+                { q: "সবচেয়ে ছোট মৌলিক সংখ্যা কোনটি?", a: "২" },
+                { q: "একটি ত্রিভুজের তিন কোণের সমষ্টি কত ডিগ্রী?", a: "১৮০ ডিগ্রী" },
+                { q: "০.৩ × ০.০৩ × ০.০০৩ = কত?", a: "০.০০০Math.০০০২৭" },
+                { q: "কোনটি সামন্তরিকের ক্ষেত্রফল নির্ণয়ের সূত্র?", a: "ভূমি × উচ্চতা" },
+                { q: "বৃত্তের ব্যাস ব্যাসার্ধের কত গুণ?", a: "২ গুণ" },
+                { q: "১ হেক্টরে কত একর?", a: "২.৪৭ একর (প্রায়)" },
+                { q: "a+b = 5 এবং a-b = 3 হলে ab এর মান কত?", a: "৪" },
+                { q: "লগারিদম (Logarithm) এর আবিষ্কারক কে?", a: "জন নেপিয়ার" },
+                { q: "শতকরা বার্ষিক ৫ টাকা হার সুদে ১২০ টাকার ৩ বছরের সুদ কত?", a: "১৮ টাকা" },
+                // Read more অংশ
+                { q: "১ থেকে ৩০ পর্যন্ত কতটি মৌলিক সংখ্যা আছে?", a: "১০ টি" },
+                { q: "একটি সমকোণী ত্রিভুজের সমকোণ ছাড়া অন্য কোণ দুটি কী কোণ?", a: "সূক্ষ্মকোণ" },
+                { q: "১০টি সংখ্যার গড় ২০ এবং অন্য ৫টি সংখ্যার গড় ৫ হলে সবগুলো সংখ্যার গড় কত?", a: "১৫" },
+                { q: "৩, ৫, ৯, ১৭, ৩৩, ... ধারাটির পরবর্তী সংখ্যাটি কত?", a: "৬৫" },
+                { q: "বৃত্তের পরিধি ও ব্যাসের অনুপাত কত?", a: "২২/৭ বা ৩.১৪১৬ (π)" },
+                { q: "একটি চতুর্ভুজের চার কোণের সমষ্টি কত?", a: "৩৬০ ডিগ্রী" },
+                { q: "কোন সংখ্যার ৬০% থেকে ৬০ বিয়োগ করলে বিয়োগফল ৬০ হয়?", a: "২০০" },
+                { q: "বর্গের প্রতিটি কোণ কত ডিগ্রী?", a: "৯০ ডিগ্রী" },
+                { q: "দুইটি সংখ্যার অনুপাত ৫:৬ এবং তাদের গ.সা.গু ৪ হলে ল.সা.গু কত?", a: "১২০" },
+                { q: "একটি সমবাহু ত্রিভুজের প্রতিটি কোণের মান কত?", a: "৬০ ডিগ্রী" },
+                { q: "১ বর্গফুট কত বর্গ ইঞ্চির সমান?", a: "১৪৪ বর্গ ইঞ্চি" },
+                { q: "শতকরা বার্ষিক কত হার সুদে যেকোনো মূলধন ৮ বছরে দ্বিগুণ হবে?", a: "১২.৫%" },
+                { q: "x + y = 6 এবং x - y = 2 হলে (x, y) এর মান কত?", a: "(৪, ২)" },
+                { q: "টাকায় ৩টি করে লেবু কিনে টাকায় ২টি করে বিক্রি করলে শতকরা কত লাভ হবে?", a: "৫০%" },
+                { q: "১ ইঞ্চি সমান কত সেন্টিমিটার?", a: "২.৫৪ সে.মি." },
+                { q: "একটি সংখ্যার তিনগুণের সাথে ২ যোগ করলে যোগফল ১৪ হয়। সংখ্যাটি কত?", a: "৪" },
+                { q: "বর্গক্ষেত্রের এক বাহু double করলে ক্ষেত্রফল কতগুণ বৃদ্ধি পাবে?", a: "৪ গুণ" },
+                { q: "ঘড়িতে যখন ৮টা বাজে তখন ঘণ্টার কাঁটা ও মিনিটের কাঁটার মধ্যবর্তী কোণ কত ডিগ্রী?", a: "১২০ ডিগ্রী" },
+                { q: "দুইটি কোণের সমষ্টি ৯০ ডিগ্রী হলে একটি অপরটির কী কোণ?", a: "পূরক কোণ" },
+                { q: "৩টি সংখ্যার গড় ১০। ১ম ও ২য় সংখ্যার গড় ৮ হলে ৩য় সংখ্যাটি কত?", a: "১৪" },
+                { q: "৫ অঙ্কের ক্ষুদ্রতম সংখ্যা ও ৪ অঙ্কের বৃহত্তম সংখ্যার পার্থক্য কত?", a: "১" },
+                { q: "a/b = 4 এবং a = 16 হলে b এর মান কত?", a: "৪" },
+                { q: "কোনো সংখ্যার অর্ধেকের সাথে ৬ যোগ করলে উত্তর ১৪ হয়। সংখ্যাটি কত?", a: "১৬" },
+                { q: "একটি ট্রাপিজিয়ামের সমান্তরাল বাহুদ্বয়ের যোগফল ১০ সেমি এবং উচ্চতা ৪ সেমি হলে ক্ষেত্রফল কত?", a: "২০ বর্গ সেমি" },
+                { q: "পিতা ও পুত্রের বর্তমান বয়সের সমষ্টি ৫০ বছর। ৫ বছর পর তাদের বয়সের সমষ্টি কত হবে?", a: "৬০ বছর" },
+                { q: "ত্রিভুজের ক্ষেত্রফল নির্ণয়ের সূত্র কোনটি?", a: "১/২ × ভূমি × উচ্চতা" },
+                { q: "৩, ৬, ৯ এর ল.সা.গু কত?", a: "১৮" },
+                { q: "যে ত্রিভুজের দুটি বাহু সমান তাকে কী বলে?", a: "সমদ্বিবাহু ত্রিভুজ" },
+                { q: "০.১ এর বর্গ কত?", a: "০.০১" },
+                { q: "৯x² - ১৬ এর উৎপাদক বিশ্লেষণ রূপ কোনটি?", a: "(৩x + ৪)(৩x - ৪)" },
+                { q: "১ মাইল সমান কত গজ?", a: "১৭৬০ গজ" },
+                { q: "একটি লাভ-ক্ষতির অংকে ক্রয়মূল্য বিক্রয়মূল্যের ৪/৫ অংশ হলে লাভের হার কত?", a: "২৫%" },
+                { q: "১২ এর ২৫% কত?", a: "৩" },
+                { q: "রম্বসের কর্ণদ্বয় পরস্পরকে কীভাবে ছেদ করে?", a: "সমকোণে সমদ্বিখণ্ডিত করে" },
+                { q: "x⁰ এর মান কত?", a: "১ (যখন x ≠ ০)" },
+                { q: "কোনো সংখ্যার ৪ গুণ থেকে ২ বিয়োগ করলে ১০ হয়?", a: "৩" },
+                { q: "১ থেকে ৫০ পর্যন্ত সংখ্যার মধ্যে জোড় সংখ্যা কতটি?", a: "২৫ টি" },
+                { q: "অনুপাত একটি কী?", a: "ভগ্নাংশ" },
+                { q: "একটি ঘনকের কয়টি তল থাকে?", a: "৬ টি" },
+                { q: "০.০০১ কোন ভগ্নাংশের সমান?", a: "১/১০০০" }
+            ],
+            gk: [
+                { q: "বাংলাদেশের স্বাধীনতা দিবস কবে পালন করা হয়?", a: "২৬শে মার্চ" },
+                { q: "বাংলাদেশের জাতীয় কবি কে?", a: "কাজী নজরুল ইসলাম" },
+                { q: "পদ্মা সেতুর দৈর্ঘ্য কত কিলোমিটার?", a: "৬.১৫ কিলোমিটার" },
+                { q: "মুজিবনগর সরকার কোন তারিখে গঠিত হয়?", a: "১০ই এপ্রিল, ১৯৭১" },
+                { q: "বর্তমান বিশ্বের সবচেয়ে বড় বদ্বীপ কোনটি?", a: "বাংলাদেশ" },
+                { q: "বাংলাদেশের একমাত্র প্রবাল দ্বীপের নাম কী?", a: "সেন্ট মার্টিন" },
+                { q: "সুন্দরবনকে বিশ্ব ঐতিহ্য (World Heritage) ঘোষণা করে কোন সংস্থা?", a: "ইউনেস্কো (UNESCO)" },
+                { q: "ইউরেনিয়াম আবিষ্কৃত হয় কোন সালে?", a: "১৭৮৯ সালে" },
+                { q: "আন্তর্জাতিক মাতৃভাষা দিবস কত তারিখে?", a: "২১শে ফেব্রুয়ারি" },
+                { q: "বাংলাদেশের সংবিধানে মোট কয়টি অনুচ্ছেদ আছে?", a: "১৫৩ টি" },
+                // Read more অংশ
+                { q: "জাতির পিতা বঙ্গবন্ধু শেখ মুজিবুর রহমান কত তারিখে ঐতিহাসিক ৭ই মার্চের ভাষণ দেন?", a: "৭ই মার্চ, ১৯৭১" },
+                { q: "বাংলাদেশের প্রথম রাষ্ট্রপতির নাম কী?", a: "বঙ্গবন্ধু শেখ মুজিবুর রহমান" },
+                { q: "বাংলাদেশের জাতীয় স্মৃতিসৌধের স্থপতি কে?", a: "সৈয়দ মাইনুল হোসেন" },
+                { q: "হিমছড়ি পর্যটন কেন্দ্রটি কোন জেলায় অবস্থিত?", a: "কক্সবাজার" },
+                { q: "মহাস্থানগড় কোন নদীর তীরে অবস্থিত?", a: "করতোয়া" },
+                { q: "গ্রিনিচ মান সময় অপেক্ষা বাংলাদেশের সময় কত ঘণ্টা এগিয়ে?", a: "+৬ ঘণ্টা" },
+                { q: "বাংলাদেশ জাতিসংঘের কততম সদস্য রাষ্ট্র?", a: "১৩৬ তম" },
+                { q: "দক্ষিণ এশিয়ার কোন দেশে প্রথম মেট্রোরেল চালু হয়?", a: "ভারত" },
+                { q: "বিশ্বের সবচেয়ে বড় ম্যানগ্রোভ বন কোনটি?", a: "সুন্দরবন" },
+                { q: "বাংলাদেশের জাতীয় প্রতীক কী?", a: "উভয় পাশে ধানের শীষবেষ্টিত ভাসমান শাপলা" },
+                { q: "ঢাকা বিশ্ববিদ্যালয় কত সালে প্রতিষ্ঠিত হয়?", a: "১৯২১ সালে" },
+                { q: "উত্তরা গণভবন কোন জেলায় অবস্থিত?", a: "নাটোর" },
+                { q: "সতীদাহ প্রথা কত সালে বিলুপ্ত হয়?", a: "১৮২৯ সালে" },
+                { q: "পৃথিবীর ফুসফুস বলা হয় কোন বনকে?", a: "আমাজন বন" },
+                { q: "সার্ক (SAARC) এর সদর দপ্তর কোথায় অবস্থিত?", a: "কাঠমান্ডু, নেপাল" },
+                { q: "ভূমধ্যসাগর ও লোহিত সাগরকে যুক্ত করেছে কোন খাল?", a: "সুয়েজ খাল" },
+                { q: "আইফেল টাওয়ার কোথায় অবস্থিত?", a: "প্যারিস, ফ্রান্স" },
+                { q: "কোন গ্রহকে লাল গ্রহ বলা হয়?", a: "মঙ্গল গ্রহ" },
+                { q: "কম্পিউটারের মস্তিষ্ক বলা হয় কোন অংশকে?", a: "CPU" },
+                { q: "ভিটামিন 'সি' এর রাসায়নিক নাম কী?", a: "অ্যাসকরবিক অ্যাসিড" },
+                { q: "রয়টার্স (Reuters) কোন দেশের সংবাদ সংস্থা?", a: "যুক্তরাজ্য (ব্রিটেন)" },
+                { q: "নোবেল পুরস্কার প্রবর্তন করা হয় কত সাল থেকে?", a: "১৯০১ সাল" },
+                { q: "আন্তর্জাতিক বিচার আদালত কোথায় অবস্থিত?", a: "হেগ, নেদারল্যান্ডস" },
+                { q: "স্ট্যাচু অব লিবার্টি কোথায় অবস্থিত?", a: "নিউইয়র্ক, যুক্তরাষ্ট্র" },
+                { q: "পানামা খাল কোন দুটি মহাসাগরকে যুক্ত করেছে?", a: "আটলান্টিক ও প্রশান্ত মহাসাগর" },
+                { q: "পৃথিবীর সবচেয়ে গভীরতম স্থান কোনটি?", a: "মারিয়ানা ট্রেন্স" },
+                { q: "জাপানের মুদ্রার নাম কী?", a: "ইয়েন" },
+                { q: "বিশ্ব পরিবেশ দিবস কবে পালিত হয়?", a: "৫ই জুন" },
+                { q: "সবচেয়ে বড় স্তন্যপায়ী প্রাণী কোনটি?", a: "নীল তিমি" },
+                { q: "মানবদেহের স্বাভাবিক তাপমাত্রা কত ফারেনহাইট?", a: "৯৮.৪ ডিগ্রী" },
+                { q: "আলোক বর্ষ কিসের একক?", a: "দূরত্বের একক" },
+                { q: "ভূমিকম্প মাপার যন্ত্রের নাম কী?", a: "সিসমোগ্রাফ" },
+                { q: "পেনিসিলিন আবিষ্কার করেন কে?", a: "অ্যালেকজান্ডার ফ্লেমিং" },
+                { q: "কোন দেশকে উদীয়মান সূর্যের দেশ বলা হয়?", a: "জাপান" },
+                { q: "বিশ্বের ক্ষুদ্রতম দেশ কোনটি?", a: "ভ্যাটিকান সিটি" },
+                { q: "কক্সবাজার সমুদ্র সৈকতের দৈর্ঘ্য কত কিলোমিটার?", a: "১২০ কিলোমিটার" },
+                { q: "বাংলাদেশের প্রথম কয়লা খনি কোথায় অবস্থিত?", a: "বড়পুকুরিয়া, দিনাজপুর" },
+                { q: "ব্লুটুথ এর আবিষ্কারক কে?", a: "হার্টসেন" },
+                { q: "ডব্লিউ ডব্লিউ ডব্লিউ (www) এর পূর্ণরূপ কী?", a: "World Wide Web" },
+                { q: "কাগজের আবিষ্কারক কোন দেশ?", a: "চীন" }
+            ]
+        };
+
+        // প্রশ্ন রেন্ডার করার মেকানিজম
+        function displayQuestions(subject, shortId, moreId) {
             const shortBox = document.getElementById(shortId);
             const moreBox = document.getElementById(moreId);
+            const list = questionData[subject];
             
-            for (let i = 1; i <= 50; i++) {
+            list.forEach((item, index) => {
                 let html = `
                     <div class="q-box">
-                        <div class="question">প্রশ্ন ${i}: ${textFormat} সম্পর্কিত গুরুত্বপূর্ণ মডেল প্রশ্ন?</div>
-                        <div class="answer">উত্তর: এটি এই প্রশ্নের সঠিক নমুনা উত্তর।</div>
+                        <div class="question">প্রশ্ন ${index + 1}: ${item.q}</div>
+                        <div class="answer">উত্তর: ${item.a}</div>
                     </div>
                 `;
-                if (i <= 10) {
+                if (index < 10) {
                     shortBox.innerHTML += html;
                 } else {
                     moreBox.innerHTML += html;
                 }
-            }
+            });
         }
 
-        // পেজ লোড হলে প্রশ্নগুলো জেনারেট হবে
         window.onload = function() {
-            generateQuestions('english', 'english-short', 'english-more', 'English Grammar & Vocabulary');
-            generateQuestions('math', 'math-short', 'math-more', 'পাটিগণিত ও বীজগণিত সমাধান');
-            generateQuestions('gk', 'gk-short', 'gk-more', 'বাংলাদেশ ও আন্তর্জাতিক বিষয়াবলী');
+            displayQuestions('english', 'english-short', 'english-more');
+            displayQuestions('math', 'math-short', 'math-more');
+            displayQuestions('gk', 'gk-short', 'gk-more');
         };
     </script>
     
-    <!-- আপনার আসল লজিক ফাইল কানেকশন -->
     <script type="module" src="./app.js"></script>
 </body>
 </html>
