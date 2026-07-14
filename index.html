@@ -1,79 +1,154 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="google-site-verification" content="hB1yhp71Kf4YlP0M8TJEivWhv87S-vnhkKbmXNsPiUU" />
-  <title> BD Gov job Official Website</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>চাকরির প্রস্তুতি - অনলাইন পোর্টাল</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; color: #333; padding-bottom: 50px; }
+        
+        /* 🔝 টপ বার এবং সিক্রেট লগইন */
+        header { background-color: #1a237e; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        header h1 { font-size: 22px; }
+        .login-trigger { background-color: transparent; color: #e8eaf6; border: 1px solid #c5cae9; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: 0.3s; text-decoration: none; font-weight: bold; }
+        .login-trigger:hover { background-color: #3f51b5; color: white; border-color: #3f51b5; }
 
-<meta charset="UTF-8" />
+        /* 📐 ৩ কলাম লেআউট */
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 25px; }
+        .column { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #3f51b5; }
+        .column-title { color: #1a237e; font-size: 20px; margin-bottom: 15px; border-bottom: 2px solid #e0e0e0; padding-bottom: 8px; text-align: center; }
+        
+        /* 📝 প্রশ্ন ও উত্তর স্টাইল */
+        .q-box { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #e0e0e0; }
+        .question { font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
+        .answer { color: #27ae60; font-weight: 500; font-size: 15px; }
+        
+        /* 📑 রিড মোর বাটন ও অতিরিক্ত অংশ */
+        .read-more-btn { display: block; width: 100%; text-align: center; background-color: #f5f5f5; color: #3f51b5; padding: 10px; border: 1px solid #dcdcdc; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 15px; transition: 0.2s; }
+        .read-more-btn:hover { background-color: #3f51b5; color: white; }
+        .more-questions { display: none; margin-top: 15px; }
 
-<meta
-  name="description"
-  content="Job official website created by Biddabari."/>
-
-<meta
-  name="keywords"
-  content="govjob, Chat, AI, Website"/>
-
-<meta name="author" content="Biddabari" />
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-<meta name="robots" content="index, follow" />
-
-<!-- Open Graph -->
-
-<meta property="og:title" content="govjob" />
-
-<meta
-  property="og:description"
-  content="Biddabari official website."/>
-
-<meta
-  property="og:image"
-  content="https://govjob.vercel.app/og-image.png"/>
-
-<meta
-  property="og:url"
-  content="https://govjob.vercel.app"/>
-
-<meta property="og:type" content="website" />
-
-<!-- Twitter -->
-
-<meta name="twitter:card" content="summary_large_image" />
-
-<meta name="twitter:title" content="Smrity" />
-
-<meta
-  name="twitter:description"
-  content="govjob official website."/>
-
-<meta
-  name="twitter:image"
-  content="https://govjob.vercel.app/og-image.png"/>
-  
-  <title>Secure Chat Login</title>
-  <link rel="stylesheet" href="style.css">
+        /* 🔒 গোপন লগইন মডাল/পপআপ (সম্পূর্ণ হাইড থাকে) */
+        .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); justify-content: center; align-items: center; z-index: 1000; }
+        .login-box { background: white; padding: 30px; border-radius: 8px; width: 90%; max-width: 360px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); position: relative; text-align: center; }
+        .login-box h3 { margin-bottom: 20px; color: #1a237e; }
+        .close-btn { position: absolute; top: 10px; right: 15px; font-size: 20px; cursor: pointer; color: #999; }
+        .close-btn:hover { color: #333; }
+        
+        /* 🛡️ ব্রাউজার পাসওয়ার্ড সেভ ব্লকিং ইনপুট */
+        .login-box input[type="password"] { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 16px; text-align: center; letter-spacing: 3px; }
+        .login-box button { width: 100%; padding: 12px; background-color: #1a237e; color: white; border: none; border-radius: 4px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        .login-box button:hover { background-color: #3f51b5; }
+    </style>
 </head>
-<body class="login-body">
+<body>
 
-  <div class="login-card-premium">
-    <div class="brand-logo-wa">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="50" height="50"><path d="M12.011 2c-5.523 0-10 4.477-10 10 0 1.775.463 3.44 1.272 4.887l-1.21 4.425 4.531-1.188c1.397.761 2.992 1.196 4.685 1.196 5.523 0 10-4.477 10-10s-4.477-10-10-10zm.029 18c-1.572 0-3.04-.426-4.307-1.166l-.309-.18-2.695.706.718-2.622-.198-.315c-.792-1.264-1.219-2.732-1.219-4.263 0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>
-    </div>
-    <h2> জব প্রিপারেশন</h2>
-    <p>আপনি এখনো প্রিমিয়াম সাবক্রিপশন কিনেন নি!</p>
-    
-    <div class="input-group-premium">
-      <input type="password" id="accessPassword" placeholder="Enter Security Password" onkeydown="if(event.key==='Enter') loginWithKey()">
-    </div>
-    
-    <button onclick="loginWithKey()" class="btn-login-premium">লগইন করুন</button>
-  </div>
+    <!-- 🔝 টপ বার -->
+    <header>
+        <h1>চাকরির প্রস্তুতি পোর্টাল</h1>
+        <!-- এই বাটনে ক্লিক করলেই কেবল সিক্রেট লগইন বক্স আসবে -->
+        <button class="login-trigger" onclick="openLoginModal()">লগইন</button>
+    </header>
 
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="app.js"></script>
+    <!-- 📐 ৩ কলামের প্রশ্নের মেইন কন্টেইনার -->
+    <div class="container">
+        
+        <!-- 🏴 কলাম ১: ইংলিশ -->
+        <div class="column">
+            <div class="column-title">⚙️ ইংরেজী (English)</div>
+            <div id="english-short">
+                <!-- এখানে ১০টি প্রশ্ন স্ক্রিপ্ট দিয়ে লোড হবে -->
+            </div>
+            <button class="read-more-btn" onclick="toggleReadMore('english')">Read More (আরও ৪০টি প্রশ্ন)</button>
+            <div id="english-more" class="more-questions">
+                <!-- রিড মোরে ক্লিক করলে বাকি ৪০টি এখানে দেখাবে -->
+            </div>
+        </div>
+
+        <!-- 🏴 কলাম ২: গণিত -->
+        <div class="column">
+            <div class="column-title">🔢 গণিত (Mathematics)</div>
+            <div id="math-short"></div>
+            <button class="read-more-btn" onclick="toggleReadMore('math')">Read More (আরও ৪০টি প্রশ্ন)</button>
+            <div id="math-more" class="more-questions"></div>
+        </div>
+
+        <!-- 🏴 কলাম ৩: সাধারণ জ্ঞান -->
+        <div class="column">
+            <div class="column-title">🌍 সাধারণ জ্ঞান (General Knowledge)</div>
+            <div id="gk-short"></div>
+            <button class="read-more-btn" onclick="toggleReadMore('gk')">Read More (আরও ৪০টি প্রশ্ন)</button>
+            <div id="gk-more" class="more-questions"></div>
+        </div>
+
+    </div>
+
+    <!-- 🔒 সিক্রেট লগইন পপআপ উইন্ডো (গুগল পাসওয়ার্ড সেভ প্রুফ) -->
+    <div id="loginModal" class="login-modal">
+        <div class="login-box">
+            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+            <h3>সুরক্ষিত প্রবেশদ্বার</h3>
+            <!-- ব্রাউজার সিকিউরিটির জন্য autocomplete="off" লক করা -->
+            <input type="password" id="accessPassword" placeholder="গোপন পিন দিন" autocomplete="off">
+            <button onclick="window.loginWithKey()">প্রবেশ করুন</button>
+        </div>
+    </div>
+
+    <!-- 📋 প্রশ্ন-উত্তর ডাটা এবং সিক্রেট পপআপ কন্ট্রোল স্ক্রিপ্ট -->
+    <script>
+        // গোপন পপআপ ফাংশনসমূহ
+        function openLoginModal() {
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('accessPassword').value = ""; // পিন মুছে রাখা
+            document.getElementById('accessPassword').focus();
+        }
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+        }
+        
+        // রিড মোর টগল ফাংশন
+        function toggleReadMore(type) {
+            const moreBox = document.getElementById(type + '-more');
+            const btn = event.target;
+            if (moreBox.style.display === 'block') {
+                moreBox.style.display = 'none';
+                btn.innerText = "Read More (আরও ৪০টি প্রশ্ন)";
+            } else {
+                moreBox.style.display = 'block';
+                btn.innerText = "কমিয়ে দেখান";
+            }
+        }
+
+        // লুপ চালিয়ে ডামি ৫০টি করে প্রশ্ন জেনারেট করার অটোমেটিক মেকানিজম (যাতে পেজটি আসল দেখায়)
+        function generateQuestions(subject, shortId, moreId, textFormat) {
+            const shortBox = document.getElementById(shortId);
+            const moreBox = document.getElementById(moreId);
+            
+            for (let i = 1; i <= 50; i++) {
+                let html = `
+                    <div class="q-box">
+                        <div class="question">প্রশ্ন ${i}: ${textFormat} সম্পর্কিত গুরুত্বপূর্ণ মডেল প্রশ্ন?</div>
+                        <div class="answer">উত্তর: এটি এই প্রশ্নের সঠিক নমুনা উত্তর।</div>
+                    </div>
+                `;
+                if (i <= 10) {
+                    shortBox.innerHTML += html;
+                } else {
+                    moreBox.innerHTML += html;
+                }
+            }
+        }
+
+        // পেজ লোড হলে প্রশ্নগুলো জেনারেট হবে
+        window.onload = function() {
+            generateQuestions('english', 'english-short', 'english-more', 'English Grammar & Vocabulary');
+            generateQuestions('math', 'math-short', 'math-more', 'পাটিগণিত ও বীজগণিত সমাধান');
+            generateQuestions('gk', 'gk-short', 'gk-more', 'বাংলাদেশ ও আন্তর্জাতিক বিষয়াবলী');
+        };
+    </script>
+    
+    <!-- আপনার আসল লজিক ফাইল কানেকশন -->
+    <script type="module" src="./app.js"></script>
 </body>
 </html>
