@@ -305,22 +305,41 @@
     <!-- আপনার আসল লজিক ফাইল কানেকশন -->
     <script type="module" src="./app.js"></script>
     <script>
-        // বাটনের ক্লিকের সাথে app.js এর মূল লগইন লজিকের সরাসরি সংযোগ
+        // বাটন ক্লিকের সাথে app.js ফাইলের লজিকের সরাসরি সংযোগ স্থাপন
         window.loginWithKey = function() {
-            const pinInput = document.getElementById('accessPassword');
-            if (window.handleSecretLogin) {
-                // app.js থেকে এক্সপোর্ট করা মূল ফাংশন কল করবে
-                window.handleSecretLogin(pinInput.value); 
+            if (typeof window.handleSecretLogin === 'function') {
+                const pinInput = document.getElementById('accessPassword');
+                window.handleSecretLogin(pinInput.value.trim());
             } else {
-                // যদি app.js পুরোপুরি লোড হতে সময় নেয় বা ব্যাকআপ চেক
-                console.log("সিস্টেম লোড হচ্ছে, অনুগ্রহ করে আবার চেষ্টা করুন।");
+                // মডিউল লোড হতে দেরি হলে বা ব্যাকআপ হিসেবে সরাসরি লজিক
+                const pinInput = document.getElementById('accessPassword');
+                const enteredPIN = pinInput ? pinInput.value.trim() : "";
+                
+                if (!enteredPIN) return alert("দয়া করে আপনার গোপন পিনটি দিন!");
+                
+                if (enteredPIN === "01609") {
+                    sessionStorage.setItem('secure_session_token', btoa("01609"));
+                    sessionStorage.setItem('secure_session_user', "Mohammad Sanwar");
+                    window.location.href = 'chat.html';
+                } else if (enteredPIN === "861155") {
+                    sessionStorage.setItem('secure_session_token', btoa("861155"));
+                    sessionStorage.setItem('secure_session_user', "Mayaboti");
+                    window.location.href = 'chat.html';
+                } else {
+                    alert("ভুল পিন! প্রবেশাধিকার নিষিদ্ধ।");
+                }
             }
         };
-        
-        // এন্টার চাপ দিলেও যেন লগইন হয় তার ব্যবস্থা
-        document.getElementById('accessPassword').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                window.loginWithKey();
+
+        // কিবোর্ডের Enter চাপ দিলেও যেন লগইন হয় তার ব্যবস্থা
+        document.addEventListener('DOMContentLoaded', () => {
+            const pinInput = document.getElementById('accessPassword');
+            if (pinInput) {
+                pinInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        window.loginWithKey();
+                    }
+                });
             }
         });
     </script>
