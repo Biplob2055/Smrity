@@ -60,15 +60,24 @@
             <div id="gk-more" class="more-questions"></div>
         </div>
     </div>
-
-    <div id="loginModal" class="login-modal">
-        <div class="login-box">
-            <span class="close-btn" onclick="closeLoginModal()">&times;</span>
-            <h3>সুরক্ষিত প্রবেশদ্বার</h3>
-            <input type="password" id="accessPassword" placeholder="গোপন পিন দিন" autocomplete="off">
-            <button onclick="window.loginWithKey()">প্রবেশ করুন</button>
-        </div>
+    <!-- 🔒 সিক্রেট লগইন পপআপ উইন্ডো (Save Password ব্লকিং ট্রিকসহ) -->
+<div id="loginModal" class="login-modal">
+    <!-- ব্রাউজারকে কনফিউজ করার জন্য ফেক/লুকানো ফিল্ড, যা ব্রাউজার ক্যাচ করবে কিন্তু ইউজার দেখবে না -->
+    <div style="opacity: 0; position: absolute; top: -9999px; left: -9999px;">
+        <input type="text" name="fakeusername" autocomplete="disabled">
+        <input type="password" name="fakepassword" autocomplete="disabled">
     </div>
+
+    <div class="login-box">
+        <span class="close-btn" onclick="closeLoginModal()">&times;</span>
+        <h3>সুরক্ষিত প্রবেশদ্বার</h3>
+        
+        <!-- আসল ইনপুট ফিল্ড: এখানে type="text" করা হয়েছে এবং স্টাইল দিয়ে ডট দেখানো হবে, যাতে পাসওয়ার্ড ম্যানেজার ট্র্যাপে না পড়ে -->
+        <input type="text" id="accessPassword" placeholder="গোপন পিন দিন" autocomplete="off" name="secure-pin-field" style="-webkit-text-security: disc; text-security: disc;">
+        
+        <button onclick="window.loginWithKey()">প্রবেশ করুন</button>
+    </div>
+</div>
 
     <script>
         function openLoginModal() {
